@@ -1,0 +1,19 @@
+.logo-bar {
+    background-color: rgb(240, 102, 36);
+    line-height: 1.5;
+    padding: 20px;
+    font-size: 30px;
+    margin-bottom: 30px;
+}
+.content{
+    padding-left: 20px;
+}
+.big-header { background-color: rgb(240, 102, 36); color: rgb(255, 255, 255); }
+.big-header div.base-container.big-header-content { padding: 120px 15px; }
+.big-header h1.root-tagline { font-size: 20px; font-weight: 300; color: rgb(255, 255, 255); margin-top: 24px; }
+.big-header div.header-actions { margin-top: 30px; }
+.big-header a.sign-in { color: rgb(255, 255, 255); text-decoration: underline; }
+.big-header a.sign-in:hover { color: rgba(255, 255, 255, 0.87); }
+.big-header a.btn-sign-up { text-decoration: none; font-size: 16px; background-color: rgb(241, 241, 241); border-color: transparent; color: rgb(28, 121, 166); }
+.big-header a.btn-sign-up:hover { background-color: rgb(221, 221, 221); }
+.bi ::before

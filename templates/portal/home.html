@@ -1,0 +1,58 @@
+{% extends 'portal/base.html' %}
+{% load crispy_forms_filters %}
+
+{% block body %}
+    <form action="." method="post">
+        {% csrf_token %}
+        {{ form |crispy }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h2>Top rated</h2>
+    <ml4-movie-row>
+        <div class="movie-row">
+            <div class="movie-row-bounds">
+                <div class="movie-row-item">
+                        <div class="movie-card-md1">
+                            <div class="card">
+                                    <a uisref="base.movie" href="/"><!---->
+                                        <span>
+                                        <div class="poster">
+                                            <img src="//image.tmdb.org/t/p/w185/hBcY0fE9pfXzvVaY4GKarweriG2.jpg" srcset="//image.tmdb.org/t/p/w500/hBcY0fE9pfXzvVaY4GKarweriG2.jpg 2x" alt="poster for The Shawshank Redemption">
+                                        </div>
+                                    </span
+                                    ></a>
+                                </link-or-emit>
+                                <div class="overlay">
+                                    <div class="above-fold">
+                                        <link-or-emit>
+                                            <a uisref="base.movie" href="/movies/318">
+                                                <span>
+                                                    <p class="title">
+                                                        The Shawshank Redemption
+                                                    </p>
+                                                </span>
+                                            </a>
+                                            </link-or-emit>
+                                        <div class="rating-indicator">
+                                            <ml4-rating-or-prediction>
+                                                <div class="rating-or-prediction predicted">
+                                                    <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="star-icon" height="14px" version="1.1" viewBox="0 0 14 14" width="14px" xmlns="http://www.w3.org/2000/svg">
+                                                        <polygon fill-rule="evenodd" points="13.7714286 5.4939887 9.22142857 4.89188383 7.27142857 0.790044361 5.32142857 4.89188383 0.771428571 5.4939887 4.11428571 8.56096041 3.25071429 13.0202996 7.27142857 10.8282616 11.2921429 13.0202996 10.4285714 8.56096041" stroke="none">
+                                                        </polygon>
+                                                    </svg>
+                                                    <div class="rating-value">4.3</div>
+                                                </div>
+                                            </ml4-rating-or-prediction>
+                                        </div>
+                    </movie-card-md1><!----><!---->
+                </movie-card-smart>
+                </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </ml4-movie-row>
+{% endblock %}
