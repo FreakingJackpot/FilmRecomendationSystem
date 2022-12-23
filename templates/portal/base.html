@@ -13,12 +13,51 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
             crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{% static 'css/authentication.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/portal.css' %}">
 </head>
+
 <body>
-<div class="page-header">
-    <h1><a href="/">MovieRec</a></h1>
-</div>
+<header class="py-3 mb-3 border-bottom">
+    <div class="container-fluid d-grid gap-3 align-items-center" style="grid-template-columns: 1fr 2fr;">
+        <div class="dropdown">
+            <a href="{% url 'portal:home' %}"
+               class="d-flex align-items-center col-lg-4 mb-2 mb-lg-0 link-dark text-decoration-none dropdown-toggle"
+               data-bs-toggle="dropdown" aria-expanded="false" style="">
+                <img class="bi me-2" src="https://img.icons8.com/ios-filled/50/FAB005/m.png"/>
+            </a>
+
+            <ul class="dropdown-menu text-small shadow" style="">
+                {% block active_menu %}
+                    <li><a class="dropdown-item active" href="{% url 'portal:home' %}" aria-current="page">Home</a></li>
+                    <li><a class="dropdown-item" href="#">Daily picks for you</a></li>
+                    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
+                {% endblock %}
+            </ul>
+        </div>
+
+        <div class="d-flex align-items-center">
+            <form class="w-100 me-3" role="search">
+                <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+            </form>
+
+            <div class="flex-shrink-0 dropdown">
+                <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                </a>
+                <ul class="dropdown-menu text-small shadow">
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
 {% block body %}
 
 {% endblock %}

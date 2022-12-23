@@ -39,11 +39,13 @@ INSTALLED_APPS = [
     'film_recommender.apps.FilmRecommenderConfig',
     'authentication',
     'crispy_forms',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -147,13 +149,13 @@ EMAIL_HOST_PASSWORD = 'SG.u557oda6RUKCIO8wKYFLxQ.H-gqbTArMw8OnwQaDH0kSQcXtke0Xge
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'sss30112001@yandex.ru'
-LOGIN_REDIRECT_URL = 'success'
 
 TMBD_API_KEY = '50fdb27edf69b6758b780ffa9fb5cc98'
 TMBD_IMAGE_CDN = 'https://image.tmdb.org/t/p/original'
 TMBD_FILES_URL = 'http://files.tmdb.org/p/exports/movie_ids_{month}_{day}_{year}.json.gz'
 
 LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/'
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     'authentication:login',
     'authentication:reset_password',
@@ -167,3 +169,5 @@ CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_TIMEZONE = "Russia/Moscow"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CORS_ALLOWED_ALL_ORIGINS = True

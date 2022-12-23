@@ -1,5 +1,14 @@
 from celery import shared_task
 
+from FilmRecomendationSystem.celery import app
+from celery.schedules import crontab
+
+
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(crontab(hour=8), import_genres, name='import_genres')
+    sender.add_periodic_task(crontab(hour=9), import_movies, name='import_movies')
+
 
 @shared_task
 def import_movies():

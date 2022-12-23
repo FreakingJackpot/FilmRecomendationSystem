@@ -23,7 +23,11 @@ class Movie(models.Model):
 
     @classmethod
     def get_10_most_rated_without_review(cls, user_id):
-        return cls.objects.prefetch_related('images').exclude(userreview__user_id=user_id).order_by('-rating')[:10]
+        return cls.get_most_related_without_review(user_id)[:10]
+
+    @classmethod
+    def get_most_related_without_review(cls, user_id):
+        return cls.objects.prefetch_related('images').exclude(userreview__user_id=user_id).order_by('-rating')
 
     @classmethod
     def get_10_most_rated_without_review_for_each_genre(cls, user_id, exclude_movie_ids):
@@ -31,7 +35,7 @@ class Movie(models.Model):
         for genre in Genre.objects.all():
             queryset = cls.get_most_rated_without_review_for_genre(user_id, genre)
             if exclude_movie_ids:
-                queryset = queryset.exclude(movie_id__in=exclude_movie_ids)
+                queryset = queryset.exclude(id__in=exclude_movie_ids)
 
             genres_recommendations[genre.name] = queryset[:10]
 
@@ -39,8 +43,8 @@ class Movie(models.Model):
 
     @classmethod
     def get_most_rated_without_review_for_genre(cls, user_id, genre):
-        return cls.objects.prefetch_related('images').filter(genre=genre).exclude(userreview__user_id=user_id).order_by(
-            '-rating')
+        return cls.objects.prefetch_related('images').filter(genres=genre).exclude(
+            userreview__user_id=user_id).order_by('-rating')
 
 
 class Image(models.Model):

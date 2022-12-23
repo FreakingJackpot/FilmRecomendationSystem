@@ -65,17 +65,18 @@ class Command(BaseCommand):
                 movies = search.movie(query=title)
                 for movie in movies['results']:
                     tmbd_movie = FilmRecommenderConfig.tmbd.Movies(movie['id']).info()
-                    movie = Movie.objects.get_or_create(tmbd_id=movie['id'],
-                                                        defaults={
-                                                            'id': id_,
-                                                            'title': title,
-                                                            'rating': movie['vote_average'],
-                                                            'overview': tmbd_movie['overview'],
-                                                            'original_language': tmbd_movie['original_language'],
-                                                            'duration': tmbd_movie['runtime'],
-                                                            'released_at': tmbd_movie['release_date'] or None,
-                                                        }
-                                                        )
+                    movie, _ = Movie.objects.get_or_create(tmbd_id=movie['id'],
+                                                           defaults={
+                                                               'id': id_,
+                                                               'title': title,
+                                                               'rating': movie['vote_average'],
+                                                               'overview': tmbd_movie['overview'],
+                                                               'original_language': tmbd_movie[
+                                                                   'original_language'],
+                                                               'duration': tmbd_movie['runtime'],
+                                                               'released_at': tmbd_movie['release_date'] or None,
+                                                           }
+                                                           )
 
                     if tmbd_movie['poster_path']:
                         images.append(Image(movie_id=movie.id, url=settings.TMBD_IMAGE_CDN + tmbd_movie['poster_path']))

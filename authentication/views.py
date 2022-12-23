@@ -8,6 +8,8 @@ from authentication.forms import RegistrationForm
 
 class CustomLoginView(LoginView):
     template_name = 'authentication/login.html'
+    redirect_authenticated_user = True
+
 
 
 class CustomPasswordResetView(PasswordResetView):
