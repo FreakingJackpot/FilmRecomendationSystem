@@ -30,7 +30,7 @@
             <ul class="dropdown-menu text-small shadow" style="">
                 {% block active_menu %}
                     <li><a class="dropdown-item active" href="{% url 'portal:home' %}" aria-current="page">Home</a></li>
-                    <li><a class="dropdown-item" href="#">Daily picks for you</a></li>
+                    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
                     <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
                 {% endblock %}
             </ul>

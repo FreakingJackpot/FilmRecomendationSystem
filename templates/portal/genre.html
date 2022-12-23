@@ -4,44 +4,13 @@
 
 {% block active_menu %}
     <li><a class="dropdown-item active" href="{% url 'portal:home' %}">Home</a></li>
-    <li><a class="dropdown-item" href="#">Daily picks for you</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
     <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
 {% endblock %}
 
 {% block body %}
     <h2 class="category" align="center">{{ genre_name }}</h2>
-    <div class="album py-5 bg-light">
-        <div class="container">
-            <div class="row">
-                {% for movie in page_obj %}
-                    <div class="col-sm-3 g-2">
-
-                        <div class="card" style="width: 18rem;">
-
-                            {% if movie.images.first.url %}
-                                <img src="{{ movie.images.first.url }}" class="card-img-top">
-                            {% else %}
-                                <svg class="bd-placeholder-img card-img-top" width="100%" height="429"
-                                     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                                     preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                                    <rect width="100%" height="100%" fill="#868e96"></rect>
-                                    <text x="37%" y="50%" fill="#dee2e6" dy=".3em">Not Found</text>
-                                </svg>
-                            {% endif %}
-                            <div class="card-body">
-                                <a href="{% url 'portal:movie-detail' movie.id %}">
-                                    <p class="card-text">{{ movie.title }}</p>
-                                </a>
-                                <div class="rating">
-                                    <p class="movie-rating">{{ movie.rating }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+    {% include 'portal/posters_layout.html' with movies=page_obj %}
     <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}

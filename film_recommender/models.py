@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.apps import apps
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 
@@ -22,29 +24,59 @@ class Movie(models.Model):
         return self.title
 
     @classmethod
-    def get_10_most_rated_without_review(cls, user_id):
-        return cls.get_most_related_without_review(user_id)[:10]
+    def get_k_most_rated_without_review(cls, user_id):
+        movies = cls.get_most_related_without_review(user_id)[:settings.TOP_K]
+        cls.set_predictions_on_movies_for_user(movies, user_id)
+        return movies
 
     @classmethod
     def get_most_related_without_review(cls, user_id):
-        return cls.objects.prefetch_related('images').exclude(userreview__user_id=user_id).order_by('-rating')
+        movies = cls.objects.prefetch_related('images', 'genres').exclude(userreview__user_id=user_id).order_by(
+            '-rating')
+        cls.set_predictions_on_movies_for_user(movies, user_id)
+        return movies
 
     @classmethod
-    def get_10_most_rated_without_review_for_each_genre(cls, user_id, exclude_movie_ids):
+    def get_most_related_without_review_on_genre_with_prediction(cls, user_id, genre_id):
+        movies = cls.get_most_rated_without_review_for_genre(user_id, genre_id)
+        cls.set_predictions_on_movies_for_user(movies, user_id)
+        return movies
+
+    @staticmethod
+    def set_predictions_on_movies_for_user(movies, user_id):
+        predictor = apps.get_app_config('film_recommender').predictor
+        predictions = predictor.predict(movies, user_id)
+        for movie, prediction in zip(movies, predictions):
+            movie.predicted_rating = prediction
+
+    @classmethod
+    def get_k_most_rated_without_review_for_each_genre(cls, user_id, exclude_movie_ids):
         genres_recommendations = {}
         for genre in Genre.objects.all():
             queryset = cls.get_most_rated_without_review_for_genre(user_id, genre)
             if exclude_movie_ids:
                 queryset = queryset.exclude(id__in=exclude_movie_ids)
 
-            genres_recommendations[genre.name] = queryset[:10]
+            movies = queryset[:settings.TOP_K]
+            cls.set_predictions_on_movies_for_user(movies, user_id)
+
+            genres_recommendations[genre.name] = movies
 
         return genres_recommendations
 
     @classmethod
     def get_most_rated_without_review_for_genre(cls, user_id, genre):
-        return cls.objects.prefetch_related('images').filter(genres=genre).exclude(
+        movies = cls.objects.prefetch_related('images', 'genres').filter(genres=genre).exclude(
             userreview__user_id=user_id).order_by('-rating')
+
+        return movies
+
+    @classmethod
+    def get_same_genres_recommends(cls, user_id, movie_id, genres):
+        movies = cls.objects.exclude(id=movie_id, userreview__user_id=user_id).filter(genres__in=genres)[
+                 :settings.TOP_K]
+        cls.set_predictions_on_movies_for_user(movies, user_id)
+        return movies
 
 
 class Image(models.Model):
@@ -85,7 +117,6 @@ class UserReview(models.Model):
 
 class DailyRecommendation(models.Model):
     user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
-    movies = models.ManyToManyField('Movie', verbose_name='Фильмы дня', )
 
     class Meta:
         verbose_name = 'Ежедневная рекомендация'
@@ -96,8 +127,10 @@ class DailyRecommendation(models.Model):
 
 
 class DailyRecommendedFilm(models.Model):
-    recommendation = models.ForeignKey('DailyRecommendation', verbose_name='рекомендация', on_delete=models.CASCADE)
-    movie = models.ForeignKey('Movie', verbose_name='Фильм дня', on_delete=models.CASCADE)
+    recommendation = models.ForeignKey('DailyRecommendation', related_name='movies', verbose_name='рекомендация',
+                                       on_delete=models.CASCADE)
+    movie = models.ForeignKey('Movie', verbose_name='Фильм дня', related_name='recommended_movies',
+                              on_delete=models.CASCADE)
     computed_rating = models.FloatField()
 
     class Meta:

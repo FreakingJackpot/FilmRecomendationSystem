@@ -9,3 +9,9 @@ class FilmRecommenderConfig(AppConfig):
 
     tmbd.API_KEY = settings.TMBD_API_KEY
     tmbd = tmbd
+
+    predictor = None
+
+    def ready(self):
+        from film_recommender.services.predictor import Predictor
+        self.predictor = Predictor()

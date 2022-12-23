@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -171,3 +172,8 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CORS_ALLOWED_ALL_ORIGINS = True
+
+CHECKPOINTS_DIR = os.path.join(BASE_DIR, 'film_recommender', 'checkpoints')
+MODEL_DIR = os.path.join(BASE_DIR, 'film_recommender', 'outputs', 'model')
+
+TOP_K = 12

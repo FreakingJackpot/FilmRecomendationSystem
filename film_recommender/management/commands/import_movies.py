@@ -80,9 +80,11 @@ class Command(BaseCommand):
 
             if len(images) >= self.objects_limit:
                 Image.objects.bulk_create(images, batch_size=500)
+                images = []
 
             if len(movies_to_update) >= self.objects_limit:
                 Movie.objects.bulk_update(movies_to_update, batch_size=500)
+                movies_to_update = []
 
         if images:
             Image.objects.bulk_create(images, batch_size=500)

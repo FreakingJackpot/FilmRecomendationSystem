@@ -2,11 +2,11 @@
 {% load crispy_forms_filters %}
 {% load static %}
 
-                {% block active_menu %}
-                    <li><a class="dropdown-item " href="{% url 'portal:home' %}">Home</a></li>
-                    <li><a class="dropdown-item" href="#">Daily picks for you</a></li>
-                    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
-                {% endblock %}
+{% block active_menu %}
+    <li><a class="dropdown-item " href="{% url 'portal:home' %}">Home</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
+{% endblock %}
 
 {% block body %}
     <div class="detail-card" movie-id="{{ movie.id }}">
@@ -34,12 +34,27 @@
                 </div>
                 <div class="col">
                     <h1 class="title">{{ movie.title }}</h1>
-                    <div class="rating">
-                        <div class="movie-rating" data-nosnippet="">
-                            <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>&nbsp;<span
-                                class="rating">{{ movie.rating }}</span>
+                    <div class="row">
+                        <div class="col">
+                            <div class="rating">
+                                <div class="movie-rating" data-nosnippet="">
+                                    <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>&nbsp;
+                                    <span class="rating">{{ movie.rating }}</span>
+                                    <span>TMBD</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="rating">
+                                <div class="movie-rating" data-nosnippet="">
+                                    <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>&nbsp;
+                                    <span class="rating">{{ movie.predicted_rating| floatformat:-2 }}</span>
+                                    <span>Predicted</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                     <div class="item-content mt-5">
                         <div class="row">
                             <div class="col-md-10 col-sm-10 col-ms-9 col-xs-12 g-10">
@@ -97,36 +112,5 @@
     </script>
 
     <h2 class="category mt-3" align="center">Same genres</h2>
-    <div class="album py-5 bg-light">
-        <div class="container">
-            <div class="row">
-                {% for movie in same_genres_recommends %}
-                    <div class="col-sm-3 g-2">
-
-                        <div class="card" style="width: 18rem;">
-
-                            {% if movie.images.first.url %}
-                                <img src="{{ movie.images.first.url }}" class="card-img-top">
-                            {% else %}
-                                <svg class="bd-placeholder-img card-img-top" width="100%" height="429"
-                                     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                                     preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                                    <rect width="100%" height="100%" fill="#868e96"></rect>
-                                    <text x="37%" y="50%" fill="#dee2e6" dy=".3em">Not Found</text>
-                                </svg>
-                            {% endif %}
-                            <div class="card-body">
-                                <a href="{% url 'portal:movie-detail' movie.id %}">
-                                    <p class="card-text">{{ movie.title }}</p>
-                                </a>
-                                <div class="rating">
-                                    <p class="movie-rating">{{ movie.rating }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+    {% include 'portal/posters_layout.html' with movies=same_genres_recommends %}
 {% endblock %}

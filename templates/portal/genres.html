@@ -4,7 +4,7 @@
 
 {% block active_menu %}
     <li><a class="dropdown-item" href="{% url 'portal:home' %}">Home</a></li>
-    <li><a class="dropdown-item" href="#">Daily picks for you</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
     <li><a class="dropdown-item active" href="{% url 'portal:genres' %}" aria-current="page">Genres</a></li>
 {% endblock %}
 
