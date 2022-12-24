@@ -48,7 +48,7 @@ class Command(BaseCommand):
             if tmbd_id in movies_in_db:
                 got_changes = False
                 movie = movies_in_db[tmbd_id]
-                for tmbd_field, db_field in self._movie_tmbd_to_bd_fields:
+                for tmbd_field, db_field in self._movie_tmbd_to_bd_fields.items():
                     new_value = tmbd_movie[tmbd_field]
                     if getattr(movie, db_field) != new_value:
                         setattr(movie, db_field, new_value)
@@ -62,7 +62,7 @@ class Command(BaseCommand):
                     movies_to_update.append(movie)
 
             else:
-                movie = Movie.objects.create(tmpb_id=tmbd_movie['id'],
+                movie = Movie.objects.create(tmbd_id=tmbd_movie['id'],
                                              title=tmbd_movie['title'],
                                              rating=tmbd_movie['vote_average'],
                                              overview=tmbd_movie['overview'],
@@ -76,7 +76,7 @@ class Command(BaseCommand):
 
             movie_genres = [id_ for genre in tmbd_movie['genres'] if (id_ := genre['id']) in genres_in_db]
 
-            movie.genres.set(*movie_genres)
+            movie.genres.set(movie_genres)
 
             if len(images) >= self.objects_limit:
                 Image.objects.bulk_create(images, batch_size=500)

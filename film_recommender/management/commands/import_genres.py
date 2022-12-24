@@ -34,7 +34,7 @@ class Command(BaseCommand):
         all_genres = genres_api.movie_list()
 
         need_to_create = []
-        for genre in all_genres:
+        for genre in all_genres['genres']:
             if genre['id'] not in existing_genres:
                 need_to_create.append(Genre(id=genre['id'], name=genre['name']))
 
