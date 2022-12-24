@@ -5,3 +5,5 @@
 * В файле film_recommender/apps.py в функции ready поставить pass перед операциями, перейти в главную директорию и ввести в консоль ./manage.py migrate portal film_recommender. после выполения комманд убрать pass из apps
 * Заполения базы готовыми пользователями введите ./manage.py import_dataset
 * Для генерации ежедневной подборки ввести ./manage.py predict_daily_recommends
+
+логин: user_1    пароль:PassWord_123_1
