@@ -1,7 +1,8 @@
 from django.contrib.auth.views import PasswordResetView, LoginView, PasswordResetDoneView, PasswordResetConfirmView, \
-    PasswordResetCompleteView
+    PasswordResetCompleteView, LogoutView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from rest_framework.decorators import api_view
 
 from authentication.forms import RegistrationForm
 
@@ -10,6 +11,9 @@ class CustomLoginView(LoginView):
     template_name = 'authentication/login.html'
     redirect_authenticated_user = True
 
+
+class CustomLogoutView(LogoutView):
+    pass
 
 
 class CustomPasswordResetView(PasswordResetView):
@@ -31,6 +35,7 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'authentication/password_reset_complete.html'
 
 
+@api_view(['POST', 'GET'])
 def registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)

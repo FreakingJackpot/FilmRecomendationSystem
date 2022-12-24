@@ -37,22 +37,25 @@
         </div>
 
         <div class="d-flex align-items-center">
-            <form class="w-100 me-3" role="search">
-                <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+            <form action="{% url 'portal:search' %}" method="get" class="w-100 me-3" role="search">
+                {% csrf_token %}
+                <input name='query' type="search" class="form-control" placeholder="Search..." aria-label="Search">
             </form>
 
             <div class="flex-shrink-0 dropdown">
                 <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
                    aria-expanded="false">
-                    <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-person-fill" viewBox="0 0 16 16">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                    </svg>
                 </a>
                 <ul class="dropdown-menu text-small shadow">
-                    <li><a class="dropdown-item" href="#">Settings</a></li>
-                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li><a class="dropdown-item" href="{% url 'account:change_email' %}">Settings</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="#">Sign out</a></li>
+                    <li><a class="dropdown-item" href="{% url 'authentication:logout' %}">Sign out</a></li>
                 </ul>
             </div>
         </div>

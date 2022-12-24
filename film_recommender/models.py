@@ -44,10 +44,11 @@ class Movie(models.Model):
 
     @staticmethod
     def set_predictions_on_movies_for_user(movies, user_id):
-        predictor = apps.get_app_config('film_recommender').predictor
-        predictions = predictor.predict(movies, user_id)
-        for movie, prediction in zip(movies, predictions):
-            movie.predicted_rating = prediction
+        if movies:
+            predictor = apps.get_app_config('film_recommender').predictor
+            predictions = predictor.predict(movies, user_id)
+            for movie, prediction in zip(movies, predictions):
+                movie.predicted_rating = prediction
 
     @classmethod
     def get_k_most_rated_without_review_for_each_genre(cls, user_id, exclude_movie_ids):
@@ -75,6 +76,12 @@ class Movie(models.Model):
     def get_same_genres_recommends(cls, user_id, movie_id, genres):
         movies = cls.objects.exclude(id=movie_id, userreview__user_id=user_id).filter(genres__in=genres)[
                  :settings.TOP_K]
+        cls.set_predictions_on_movies_for_user(movies, user_id)
+        return movies
+
+    @classmethod
+    def search(cls, user_id, text):
+        movies = cls.objects.filter(title__icontains=text)
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
 

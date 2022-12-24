@@ -1,0 +1,15 @@
+{% extends 'portal/base.html' %}
+{% load crispy_forms_filters %}
+{% load static %}
+
+{% block active_menu %}
+    <li><a class="dropdown-item active" href="{% url 'portal:home' %}">Home</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
+{% endblock %}
+
+{% block body %}
+    <h2 class="category" align="center">Search results</h2>
+    {% include 'portal/posters_layout.html' with movies=movies %}
+
+{% endblock %}

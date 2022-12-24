@@ -1,6 +1,5 @@
 from django.views.generic import View, ListView, DetailView
 from django.shortcuts import render, get_object_or_404
-from django.conf import settings
 
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
@@ -95,3 +94,9 @@ def review(request, pk, **kwargs):
         review.save()
 
     return Response(data={'status': 'ok'}, status=HTTP_200_OK)
+
+
+class SearchMovieView(View):
+    def get(self, request):
+        movies = Movie.search(request.user.id, request.GET.get('query'))
+        return render(request, 'portal/search_results.html', {'movies': movies})

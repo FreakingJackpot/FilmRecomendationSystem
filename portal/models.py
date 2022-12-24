@@ -1,5 +1,4 @@
 from django.contrib.auth.hashers import make_password
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 from django.db import models
@@ -8,8 +7,6 @@ from django.db import models
 # Create your models here.
 
 class CustomUser(AbstractUser):
-    about = models.TextField(verbose_name='О себе')
-
     @classmethod
     def create_user_by_id(cls, user_id):
         username = f'user_{user_id}'

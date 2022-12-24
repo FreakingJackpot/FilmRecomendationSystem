@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import sklearn.preprocessing
 import tensorflow as tf
@@ -83,6 +84,11 @@ class TrainingData(object):
 class ModelTrainer(object):
     def __init__(self, training_data):
         self.training_data = training_data
+
+        for filename in os.listdir(settings.CHECKPOINTS_DIR):
+            file_path = os.path.join(settings.CHECKPOINTS_DIR, filename)
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
 
         self.wide_columns, self.deep_columns = wide_deep.build_feature_columns(
             users=training_data.users[USER_COL].values,

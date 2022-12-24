@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'portal',
+    'account',
     'film_recommender.apps.FilmRecommenderConfig',
     'authentication',
     'crispy_forms',
@@ -68,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -165,9 +168,11 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     'authentication:password_reset_complete',
     'authentication:registration',
 ]
-CELERY_BROKER_URL = 'amqp://localhost'
+LOGOUT_REDIRECT_URL = LOGIN_URL
 
-CELERY_TIMEZONE = "Russia/Moscow"
+CELERY_BROKER_URL = 'pyamqp://localhost'
+CELERY_RESULT_BACKEND = 'rpc://localhost'
+CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
@@ -177,3 +182,26 @@ CHECKPOINTS_DIR = os.path.join(BASE_DIR, 'film_recommender', 'checkpoints')
 MODEL_DIR = os.path.join(BASE_DIR, 'film_recommender', 'outputs', 'model')
 
 TOP_K = 12
+
+CELERY_BEAT_SCHEDULE = {
+    "quack": {
+        "task": "film_recommender.tasks.quack",
+        "schedule": crontab(),
+    },
+    "import_genres": {
+        "task": "film_recommender.tasks.import_genres",
+        "schedule": crontab(hour=8),
+    },
+    "import_movies": {
+        "task": "film_recommender.tasks.import_movies",
+        "schedule": crontab(hour=9),
+    },
+    "train_model": {
+        "task": "film_recommender.tasks.train_model",
+        "schedule": crontab(minute='*/60'),
+    },
+    "predict_daily_recommends": {
+        "task": "film_recommender.tasks.predict_daily_recommends",
+        "schedule": crontab(minute=0, hour=0),
+    },
+}

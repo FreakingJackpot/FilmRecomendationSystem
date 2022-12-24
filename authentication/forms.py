@@ -3,15 +3,16 @@ from django.contrib.auth import password_validation, get_user_model
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
+from django.contrib.auth.hashers import make_password
 
+UserModel = get_user_model()
 
 
 class RegistrationForm(forms.Form):
-    UserModel = get_user_model()
-
     error_messages = {
         "password_mismatch": _("The two password fields didn’t match."),
         "email_already_exist": _("This email already have account"),
+        "username_already_exist": _("This username already have account"),
     }
 
     username = forms.CharField(label='username', max_length=255)
@@ -38,13 +39,21 @@ class RegistrationForm(forms.Form):
         email = self.cleaned_data.get("email")
         validate_email(email)
 
-        if self.UserModel.objects.filter(email=email).exists():
+        if UserModel.objects.filter(email=email).exists():
             raise ValidationError(
                 self.error_messages["email_already_exist"],
                 code="email_already_exist",
             )
 
         return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if UserModel.objects.filter(username=username).exists():
+            raise ValidationError(
+                self.error_messages["username_already_exist"],
+                code="username_already_exist",
+            )
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -59,8 +68,8 @@ class RegistrationForm(forms.Form):
         return password2
 
     def save(self):
-        password = self.cleaned_data["password1"]
+        password = make_password(self.cleaned_data["password1"])
         username = self.cleaned_data['username']
         email = self.cleaned_data['email']
 
-        self.UserModel.objects.create(username=username, password=password, email=email)
+        UserModel.objects.create(username=username, password=password, email=email)
