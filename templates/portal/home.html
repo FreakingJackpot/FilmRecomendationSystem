@@ -7,7 +7,7 @@
     {% include 'portal/posters_layout.html' with movies=most_rated_movies %}
 
     {% for genre, movies in most_rated_by_genres.items %}
-        <h2 align="center">{{ genre }}</h2>
+        <h2 class="category" align="center">{{ genre }}</h2>
         {% include 'portal/posters_layout.html' with movies=movies %}
     {% endfor %}
 {% endblock %}
