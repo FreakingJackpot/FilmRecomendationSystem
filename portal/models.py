@@ -7,6 +7,8 @@ from django.db import models
 # Create your models here.
 
 class CustomUser(AbstractUser):
+    favourite_genres = models.ManyToManyField(through='film_recommender.FavouriteGenre', to='film_recommender.Genre')
+
     @classmethod
     def create_user_by_id(cls, user_id):
         username = f'user_{user_id}'

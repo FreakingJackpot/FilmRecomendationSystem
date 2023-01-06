@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password
 
-from film_recommender.models import Genre, FavouriteGenres
+from film_recommender.models import Genre, FavouriteGenre
 
 UserModel = get_user_model()
 
@@ -87,7 +87,8 @@ class ChangePasswordForm(forms.Form):
 class FavouriteGenresForm(forms.Form):
     genres = forms.ModelMultipleChoiceField(
         queryset=Genre.objects.all(),
-        widget=forms.CheckboxSelectMultiple
+        widget=forms.CheckboxSelectMultiple,
+        required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -96,5 +97,9 @@ class FavouriteGenresForm(forms.Form):
 
     def save(self):
         genres = self.cleaned_data["genres"]
-        favourites, _ = FavouriteGenres.objects.get_or_create(user=self.user)
-        favourites.genres.set(genres)
+        favourites = FavouriteGenre.objects.filter(user=self.user)
+        favourites.delete()
+
+        if genres:
+            new_favourites = [FavouriteGenre(user=self.user, genre=genre) for genre in genres]
+            FavouriteGenre.objects.bulk_create(new_favourites)

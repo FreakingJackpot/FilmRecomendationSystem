@@ -5,7 +5,7 @@ from django.apps import apps
 from django.core.management.base import BaseCommand
 
 from portal.models import CustomUser
-from film_recommender.models import Movie, FavouriteGenres, DailyRecommendation, DailyRecommendedFilm
+from film_recommender.models import Movie, FavouriteGenre, DailyRecommendation, DailyRecommendedFilm
 
 APP_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -23,7 +23,7 @@ class Command(BaseCommand):
             self._create_recomendation(user_id, predictions)
 
     def _get_movies(self, user_id):
-        genres = FavouriteGenres.objects.filter(user_id=user_id).values_list('genres', flat=True)
+        genres = FavouriteGenre.objects.filter(user_id=user_id).values_list('genre_id', flat=True)
 
         base_queryset = Movie.objects.prefetch_related('genres').only('id', 'genres__name').exclude(
             userreview__user_id=user_id).order_by('-rating')

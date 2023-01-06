@@ -7,10 +7,6 @@ def import_movies():
     Command().handle()
 
 
-@shared_task
-def quack():
-    print('quack')
-
 
 @shared_task
 def import_genres():

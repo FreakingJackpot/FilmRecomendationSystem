@@ -89,6 +89,7 @@ class Movie(models.Model):
 class Image(models.Model):
     movie = models.ForeignKey('Movie', related_name='images', verbose_name='Фильм', on_delete=models.CASCADE)
     url = models.TextField()
+    active = models.BooleanField(default=True, verbose_name='Активна')
 
     class Meta:
         verbose_name = 'Картинка'
@@ -148,6 +149,9 @@ class DailyRecommendedFilm(models.Model):
         return f'{self.recommendation.user.username}_{self.movie.title}_{self.computed_rating}'
 
 
-class FavouriteGenres(models.Model):
+class FavouriteGenre(models.Model):
     user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
-    genres = models.ManyToManyField('Genre', verbose_name='Жанры')
+    genre = models.ForeignKey('Genre', verbose_name='Жанры', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ['user', 'genre']
