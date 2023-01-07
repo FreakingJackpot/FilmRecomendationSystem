@@ -34,6 +34,7 @@ class Command(BaseCommand):
 
     def import_movies(self, bytes_io):
         movies_in_db = Movie.objects.in_bulk(field_name='tmbd_id')
+        movie_ids_with_posters = set(Image.objects.filter(active=True).values_list('movie_id', flat=True))
         genres_in_db = set(Genre.objects.values_list('id', flat=True))
 
         file = gzip.GzipFile('movies_json', 'r', fileobj=bytes_io)
@@ -49,14 +50,10 @@ class Command(BaseCommand):
                 got_changes = False
                 movie = movies_in_db[tmbd_id]
                 for tmbd_field, db_field in self._movie_tmbd_to_bd_fields.items():
-                    new_value = tmbd_movie[tmbd_field]
+                    new_value = tmbd_movie.get(tmbd_field)
                     if getattr(movie, db_field) != new_value:
                         setattr(movie, db_field, new_value)
                         got_changes = True
-
-                if movie.released_at != tmbd_movie['release_date']:
-                    movie.released_at = tmbd_movie['release_date'] or None
-                    got_changes = True
 
                 if got_changes:
                     movies_to_update.append(movie)
@@ -71,7 +68,7 @@ class Command(BaseCommand):
                                              released_at=tmbd_movie['release_date'] or None
                                              )
 
-            if tmbd_movie['poster_path']:
+            if movie.id not in movie_ids_with_posters and tmbd_movie['poster_path']:
                 images.append(Image(movie_id=movie.id, url=settings.TMBD_IMAGE_CDN + tmbd_movie['poster_path']))
 
             movie_genres = [id_ for genre in tmbd_movie['genres'] if (id_ := genre['id']) in genres_in_db]

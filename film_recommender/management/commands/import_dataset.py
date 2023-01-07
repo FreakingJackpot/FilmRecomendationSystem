@@ -24,13 +24,13 @@ APP_DIR = Path(__file__).resolve().parent.parent.parent
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        genres = self.import_genres()
+        self.import_genres()
         self.import_movies()
         self.import_reviews()
 
     def import_genres(self):
         Genre.objects.all().delete()
-        genres = {}
+        genres = []
 
         with open(os.path.join(APP_DIR, 'datasets', 'ml-100k', 'u.genre')) as csvfile:
             reader = csv.reader(csvfile, delimiter='|')
@@ -39,11 +39,9 @@ class Command(BaseCommand):
                     id_ = row[1]
                     if id_ != '0':
                         name = row[0]
-                        genres[name] = Genre(id=id_, name=name)
+                        genres.append(Genre(id=id_, name=name))
 
-        Genre.objects.bulk_create(genres.values())
-
-        return genres
+        Genre.objects.bulk_create(genres)
 
     def import_movies(self):
         Movie.objects.all().delete()
