@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
-import os
 
 from film_recommender.services.training import TrainingData, ModelTrainer
 

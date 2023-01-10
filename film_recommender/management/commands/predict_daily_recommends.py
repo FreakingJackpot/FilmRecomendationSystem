@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         count_with_favourite_genres = settings.TOP_K // 2
 
-        for user_id in CustomUser.objects.values_list('id', flat=True):
+        for user_id in CustomUser.objects.filter(id=3).values_list('id', flat=True):
             movies = self._get_movies(user_id)
             predictions = self._predict_movies(user_id, movies, count_with_favourite_genres)
             self._create_recomendation(user_id, predictions)
@@ -28,8 +28,8 @@ class Command(BaseCommand):
         base_queryset = Movie.objects.prefetch_related('genres').only('id', 'genres__name').exclude(
             userreview__user_id=user_id).order_by('-rating')
 
-        favourite_genre_movies = base_queryset.filter(genres__in=genres)
-        other_movies = base_queryset.exclude(id__in=favourite_genre_movies)
+        favourite_genre_movies = base_queryset.filter(genres__in=genres).in_bulk()
+        other_movies = base_queryset.in_bulk()
 
         return {'favourite_genre': favourite_genre_movies, 'other': other_movies}
 
@@ -38,15 +38,17 @@ class Command(BaseCommand):
 
         if movies['favourite_genre']:
             predicted_movie_ids.extend(PREDICTOR.get_top_k(
-                movies['favourite_genre'],
+                movies['favourite_genre'].values(),
                 user_id,
                 count_with_favourite_genres
             ))
 
         k = settings.TOP_K - len(predicted_movie_ids)
+        for movie_id, _ in predicted_movie_ids:
+            movies['other'].pop(movie_id)
 
         predicted_movie_ids.extend(PREDICTOR.get_top_k(
-            movies['other'],
+            movies['other'].values(),
             user_id,
             k
         ))
@@ -55,6 +57,8 @@ class Command(BaseCommand):
 
     def _create_recomendation(self, user_id, predictions):
         recommendation, _ = DailyRecommendation.objects.get_or_create(user_id=user_id)
+
+        DailyRecommendedFilm.objects.filter(recommendation=recommendation).delete()
 
         recommended_films = []
         for prediction in predictions:

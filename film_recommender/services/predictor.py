@@ -67,7 +67,7 @@ class Predictor(object):
             )()["inputs"]
         )
 
-        return [float(prediction) for prediction in predictions['predictions']]
+        return [float(prediction) * 2 for prediction in predictions['predictions']]
 
     def _prepare_data_from_movies(self, movies, user_id):
         genres_encoder = sklearn.preprocessing.MultiLabelBinarizer(classes=self.classes)
