@@ -1,0 +1,31 @@
+{% extends 'account/base.html' %}
+{% load crispy_forms_filters %}
+{% load static %}
+
+{% block category %}
+    <a class="list-group-item list-group-item-action " data-toggle="list"
+       href="{% url 'account:change_email' %}">Change Email</a>
+    <a class="list-group-item list-group-item-action " data-toggle="list"
+       href="{% url 'account:change_password' %}">Change password</a>
+    <a class="list-group-item list-group-item-action" data-toggle="list"
+       href="{% url 'account:manage_favourite_genres' %}">Add Favourite Genres</a>
+    <a class="list-group-item list-group-item-action active" data-toggle="list"
+       href="{% url 'account:generate_api_token' %}">API Token Management</a>
+{% endblock %}
+
+{% block main_activity %}
+
+    {% if token %}
+        Access token: {{ token.key }}<br>
+        Created: {{ token.created }}<br>
+    {% else %}
+        No active Token
+    {% endif %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="submit" name="generate_token" value="Generate Token"/>
+        <input type="submit" name="delete_token" value="Delete Token"/>
+    </form>
+
+{% endblock %}

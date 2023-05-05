@@ -4,6 +4,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password
+from rest_framework.authtoken.models import Token
 
 from film_recommender.models import Genre, FavouriteGenre
 

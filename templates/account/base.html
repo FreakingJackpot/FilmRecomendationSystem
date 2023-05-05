@@ -29,13 +29,15 @@
                             <hr class="border-light m-0">
 
                             <div class="card-body">
-                                <div class="form-group">
-                                    <form action="." method="post">
-                                        {% csrf_token %}
-                                        {{ form |crispy }}
-                                        <input class="mt-2 btn btn-primary" type="submit" value="Submit">
-                                    </form>
-                                </div>
+                                {% block main_activity %}
+                                    <div class="form-group">
+                                        <form action="." method="post">
+                                            {% csrf_token %}
+                                            {{ form |crispy }}
+                                            <input class="mt-2 btn btn-primary" type="submit" value="Submit">
+                                        </form>
+                                    </div>
+                                {% endblock %}
 
                             </div>
                         </div>

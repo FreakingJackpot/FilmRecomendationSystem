@@ -20,6 +20,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',
+    'drf_yasg',
     'portal',
     'account',
     'film_recommender.apps.FilmRecommenderConfig',
@@ -108,7 +110,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
@@ -178,4 +179,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "film_recommender.tasks.predict_daily_recommends",
         "schedule": crontab(minute=0, hour=0),
     },
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'format': 'Token',
+        }
+    }
 }

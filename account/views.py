@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.authtoken.models import Token
 
 from account.forms import ChangeEmailForm, ChangePasswordForm, FavouriteGenresForm
 from film_recommender.models import FavouriteGenre
@@ -40,3 +41,18 @@ def manage_favourite_genres(request):
         form = FavouriteGenresForm(user=request.user, initial=initial)
 
     return render(request, 'account/manage_favourite_genres.html', {'form': form})
+
+
+def generate_api_token(request):
+    token = None
+
+    if request.method == 'POST':
+        Token.objects.filter(user=request.user).delete()
+
+        if 'generate_token' in request.POST:
+            token = Token.objects.create(user=request.user)
+    else:
+        token = Token.objects.filter(user=request.user).first()
+
+    context = {'token': token}
+    return render(request, 'account/generate_api_token.html', context)

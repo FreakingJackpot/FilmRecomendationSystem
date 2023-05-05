@@ -3,7 +3,6 @@ from django.shortcuts import render, get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
-from rest_framework.decorators import api_view
 
 from film_recommender.models import Movie, UserReview, Genre, DailyRecommendation
 
@@ -80,7 +79,12 @@ class DailyRecommendView(DetailView):
         return queryset
 
 
-@api_view(['POST'])
+class SearchMovieView(View):
+    def get(self, request):
+        movies = Movie.search(request.user.id, request.GET.get('query'))
+        return render(request, 'portal/search_results.html', {'movies': movies})
+
+
 def review(request, pk, **kwargs):
     rating = request.data.get('rating')
     user = request.user
@@ -94,9 +98,3 @@ def review(request, pk, **kwargs):
         review.save()
 
     return Response(data={'status': 'ok'}, status=HTTP_200_OK)
-
-
-class SearchMovieView(View):
-    def get(self, request):
-        movies = Movie.search(request.user.id, request.GET.get('query'))
-        return render(request, 'portal/search_results.html', {'movies': movies})
