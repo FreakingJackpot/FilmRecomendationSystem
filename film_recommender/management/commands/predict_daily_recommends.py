@@ -1,16 +1,13 @@
 from pathlib import Path
 
 from django.conf import settings
-from django.apps import apps
 from django.core.management.base import BaseCommand
 
 from portal.models import CustomUser
 from film_recommender.models import Movie, FavouriteGenre, DailyRecommendation, DailyRecommendedFilm
+from film_recommender.prediction_service import Predictor
 
 APP_DIR = Path(__file__).resolve().parent.parent.parent
-
-PREDICTOR = apps.get_app_config('film_recommender').predictor
-
 
 class Command(BaseCommand):
 
@@ -37,7 +34,7 @@ class Command(BaseCommand):
         predicted_movie_ids = []
 
         if movies['favourite_genre']:
-            predicted_movie_ids.extend(PREDICTOR.get_top_k(
+            predicted_movie_ids.extend(Predictor.get_top_k(
                 movies['favourite_genre'].values(),
                 user_id,
                 count_with_favourite_genres
@@ -47,7 +44,7 @@ class Command(BaseCommand):
         for movie_id, _ in predicted_movie_ids:
             movies['other'].pop(movie_id)
 
-        predicted_movie_ids.extend(PREDICTOR.get_top_k(
+        predicted_movie_ids.extend(Predictor.get_top_k(
             movies['other'].values(),
             user_id,
             k

@@ -15,12 +15,6 @@ def import_genres():
 
 
 @shared_task
-def train_model():
-    from film_recommender.management.commands.train_model import Command
-    Command().handle()
-
-
-@shared_task
 def predict_daily_recommends():
     from film_recommender.management.commands.predict_daily_recommends import Command
     Command().handle()

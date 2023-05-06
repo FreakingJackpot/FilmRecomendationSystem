@@ -3,6 +3,8 @@ from django.apps import apps
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 
+from film_recommender.prediction_service import Predictor
+
 
 # Create your models here.
 class Movie(models.Model):
@@ -45,8 +47,9 @@ class Movie(models.Model):
     @staticmethod
     def set_predictions_on_movies_for_user(movies, user_id):
         if movies:
-            predictor = apps.get_app_config('film_recommender').predictor
-            predictions = predictor.predict(movies, user_id)
+            movie_ids = [movie.id for movie in movies]
+            predictions = Predictor.predict(user_id,movie_ids)
+
             for movie, prediction in zip(movies, predictions):
                 movie.predicted_rating = prediction
 

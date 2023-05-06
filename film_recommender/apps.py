@@ -11,7 +11,3 @@ class FilmRecommenderConfig(AppConfig):
     tmbd = tmbd
 
     predictor = None
-
-    def ready(self):
-        from film_recommender.services.predictor import Predictor
-        self.predictor = Predictor()
