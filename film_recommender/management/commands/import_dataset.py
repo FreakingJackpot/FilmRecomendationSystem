@@ -4,29 +4,25 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from recommenders.utils.constants import (
-    DEFAULT_USER_COL as USER_COL,
-    DEFAULT_ITEM_COL as ITEM_COL,
-    DEFAULT_RATING_COL as RATING_COL,
-    DEFAULT_GENRE_COL as ITEM_FEAT_COL,
-)
-from recommenders.datasets import movielens
+import pandas as pd
 
-from film_recommender.models import Genre, Movie, UserReview, Image
+from film_recommender.models import Genre, Movie, UserReview, Image, Tag
 from film_recommender.apps import FilmRecommenderConfig
 from portal.models import CustomUser
 
-MOVIELENS_DATA_SIZE = '100k'
-
 APP_DIR = Path(__file__).resolve().parent.parent.parent
+
+USER_COLUMN = 'userId'
+ITEM_COLUMN = 'movieId'
+RATING_COLUMN = 'rating'
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.import_genres()
-        self.import_movies()
-        self.import_reviews()
+        self.import_tags()
+        self.import_movies_and_ratings()
 
     def import_genres(self):
         Genre.objects.all().delete()
@@ -43,57 +39,60 @@ class Command(BaseCommand):
 
         Genre.objects.bulk_create(genres)
 
-    def import_movies(self):
+    def import_tags(self):
+        Tag.objects.all().delete()
+        tags = []
+
+        with open(os.path.join(APP_DIR, 'datasets', 'tags.csv')) as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            for idx, row in enumerate(reader):
+                if row and idx:
+                    name = row[0]
+                    tags.append(Tag(id=idx, name=name))
+
+        Tag.objects.bulk_create(tags)
+
+    def import_movies_and_ratings(self):
+        dataset = pd.read_pickle(os.path.join(APP_DIR, 'datasets', 'dataset.pkl'))
+        self._import_movies(dataset)
+
+    def _import_movies(self, dataset):
         Movie.objects.all().delete()
         Image.objects.all().delete()
 
-        search = FilmRecommenderConfig.tmbd.Search()
+        all_genres = {genre.name: genre.id for genre in Genre.objects.all().iterator()}
+        all_tags = {tag.name: tag.id for tag in Tag.objects.all().iterator()}
 
         images = []
 
-        with open(os.path.join(APP_DIR, 'datasets', 'ml-100k', 'u.item'), encoding="ISO-8859-1") as csvfile:
-            reader = csv.reader(csvfile, delimiter='|')
-            for row in reader:
-                title = row[1]
-                id_ = row[0]
+        for idx, row in dataset.iterrows():
+            id_ = row['movieId']
+            tmdb_id = int(row['tmdbId'])
+            movie_info = FilmRecommenderConfig.tmdb.Movies(int(row['tmdbId'])).info()
+            movie, _ = Movie.objects.get_or_create(tmdb_id=tmdb_id,
+                                                   defaults={
+                                                       'id': id_,
+                                                       'title': movie_info['title'],
+                                                       'rating': movie_info['vote_average'],
+                                                       'overview': movie_info['overview'],
+                                                       'original_language': movie_info['original_language'],
+                                                       'duration': movie_info['runtime'],
+                                                       'released_at': movie_info['release_date'] or None,
+                                                   }
+                                                   )
 
-                year_index = title.rfind('(')
-                title = title.replace(title[year_index:], '')
+            if movie_info['poster_path']:
+                images.append(Image(movie_id=movie.id, url=settings.TMDB_IMAGE_CDN + movie_info['poster_path']))
 
-                movies = search.movie(query=title)
-                for movie in movies['results']:
-                    tmbd_movie = FilmRecommenderConfig.tmbd.Movies(movie['id']).info()
-                    movie, _ = Movie.objects.get_or_create(tmbd_id=movie['id'],
-                                                           defaults={
-                                                               'id': id_,
-                                                               'title': title,
-                                                               'rating': movie['vote_average'],
-                                                               'overview': tmbd_movie['overview'],
-                                                               'original_language': tmbd_movie[
-                                                                   'original_language'],
-                                                               'duration': tmbd_movie['runtime'],
-                                                               'released_at': tmbd_movie['release_date'] or None,
-                                                           }
-                                                           )
+            movie_genres = [all_genres[genre_name] for genre_name in row['genres'] if genre_name in all_genres]
+            movie.genres.add(*movie_genres)
 
-                    if tmbd_movie['poster_path']:
-                        images.append(Image(movie_id=movie.id, url=settings.TMBD_IMAGE_CDN + tmbd_movie['poster_path']))
+            movie_tags = [all_tags[tag_name] for tag_name in row['tags'] if tag_name in all_tags]
+            movie.tags.add(*movie_tags)
 
-                    movie_genres = [id_ for id_, value in enumerate(row[6:], start=1) if int(value)]
+        Image.objects.bulk_create(images, batch_size=500)
 
-                    movie.genres.add(*movie_genres)
-                    break
-
-            Image.objects.bulk_create(images, batch_size=500)
-
-    def import_reviews(self):
-        data = movielens.load_pandas_df(
-            size=MOVIELENS_DATA_SIZE,
-            header=[USER_COL, ITEM_COL, RATING_COL],
-            genres_col=ITEM_FEAT_COL
-        )
-
-        data[ITEM_FEAT_COL] = data[ITEM_FEAT_COL].apply(lambda s: s.split("|"))
+    def _import_reviews(self, dataset):
 
         users = set()
         CustomUser.objects.exclude(username='admin').delete()
@@ -101,12 +100,13 @@ class Command(BaseCommand):
         movies_ids = set(Movie.objects.values_list('id', flat=True))
 
         reviews = []
-        data = data.reset_index()
-        for index, item in data.iterrows():
-            if not item[USER_COL] in users:
-                CustomUser.create_user_by_id(item[USER_COL])
-                users.add(item[USER_COL])
-            if item[ITEM_COL] in movies_ids:
-                reviews.append(UserReview(user_id=item[USER_COL], movie_id=item[ITEM_COL], rating=item[RATING_COL]))
+        for idx, row in dataset.iterrows():
+            if not row[USER_COLUMN] in users:
+                CustomUser.create_user_by_id(row[USER_COLUMN])
+                users.add(row[USER_COLUMN])
+
+            if row[ITEM_COLUMN] in movies_ids:
+                reviews.append(
+                    UserReview(user_id=row[USER_COLUMN], movie_id=row[ITEM_COLUMN], rating=row[RATING_COLUMN]))
 
         UserReview.objects.bulk_create(reviews, batch_size=500)

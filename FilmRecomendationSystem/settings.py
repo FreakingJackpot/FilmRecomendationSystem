@@ -72,7 +72,7 @@ DATABASES = {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
-        'NAME': 'postgres',
+        'NAME': 'test',
 
         'USER': 'postgres',
 
@@ -124,14 +124,14 @@ SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
-EMAIL_HOST_PASSWORD = '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'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'sss30112001@yandex.ru'
 
-TMBD_API_KEY = '50fdb27edf69b6758b780ffa9fb5cc98'
-TMBD_IMAGE_CDN = 'https://image.tmdb.org/t/p/original'
-TMBD_FILES_URL = 'http://files.tmdb.org/p/exports/movie_ids_{month}_{day}_{year}.json.gz'
+TMDB_API_KEY = '50fdb27edf69b6758b780ffa9fb5cc98'
+TMDB_IMAGE_CDN = 'https://image.tmdb.org/t/p/original'
+TMDB_FILES_URL = 'http://files.tmdb.org/p/exports/movie_ids_{month}_{day}_{year}.json.gz'
 
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -168,7 +168,7 @@ TOP_K = 12
 CELERY_BEAT_SCHEDULE = {
     "quack": {
         "task": "film_recommender.tasks.quack",
-        "schedule": crontab(),
+        "schedule": crontab(minute='*/1'),
     },
     "import_genres": {
         "task": "film_recommender.tasks.import_genres",

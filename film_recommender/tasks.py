@@ -24,3 +24,8 @@ def predict_daily_recommends():
 def import_dataset():
     from film_recommender.management.commands.import_dataset import Command
     Command().handle()
+
+
+@shared_task
+def quack():
+    print('quack')

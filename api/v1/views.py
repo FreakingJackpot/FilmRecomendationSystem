@@ -44,7 +44,7 @@ class PredictUserFilmsRatingAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
-        movies = Movie.objects.filter(tmbd_id__in=data['movie_ids'])
+        movies = Movie.objects.filter(tmdb_id__in=data['movie_ids'])
 
         Movie.set_predictions_on_movies_for_user(movies, request.user.id)
 

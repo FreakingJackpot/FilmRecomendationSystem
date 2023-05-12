@@ -85,6 +85,15 @@ class SearchMovieView(View):
         return render(request, 'portal/search_results.html', {'movies': movies})
 
 
+class ReviewedMoviesView(ListView):
+    paginate_by = 20
+    template_name = 'portal/reviewed_films.html'
+
+    def get_queryset(self):
+        queryset = UserReview.get_user_reviews(self.request.user.id)
+        return queryset
+
+
 def review(request, pk, **kwargs):
     rating = request.data.get('rating')
     user = request.user

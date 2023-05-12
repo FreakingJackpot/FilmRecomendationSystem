@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def import_genres(self):
         existing_genres = set(Genre.objects.values_list('id', flat=True))
 
-        genres_api = FilmRecommenderConfig.tmbd.Genres()
+        genres_api = FilmRecommenderConfig.tmdb.Genres()
         all_genres = genres_api.movie_list()
 
         need_to_create = []

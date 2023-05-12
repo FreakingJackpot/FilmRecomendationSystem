@@ -10,7 +10,8 @@ from film_recommender.prediction_service import Predictor
 class Movie(models.Model):
     title = models.TextField(verbose_name='Название')
     genres = models.ManyToManyField('Genre', verbose_name='Жанры')
-    tmbd_id = models.IntegerField(db_index=True, unique=True)
+    tags = models.ManyToManyField('Tag', verbose_name='Теги')
+    tmdb_id = models.IntegerField(db_index=True, unique=True)
     rating = models.FloatField(default=0)
     overview = models.TextField(verbose_name='Сюжет', null=True, blank=True)
     duration = models.IntegerField(verbose_name='Продолжительность', null=True, blank=True)
@@ -48,7 +49,7 @@ class Movie(models.Model):
     def set_predictions_on_movies_for_user(movies, user_id):
         if movies:
             movie_ids = [movie.id for movie in movies]
-            predictions = Predictor.predict(user_id,movie_ids)
+            predictions = Predictor.predict(user_id, movie_ids)
 
             for movie, prediction in zip(movies, predictions):
                 movie.predicted_rating = prediction
@@ -113,6 +114,17 @@ class Genre(models.Model):
         return self.name
 
 
+class Tag(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=255)
+
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
+    def __str__(self):
+        return self.name
+
+
 class UserReview(models.Model):
     user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
     movie = models.ForeignKey('Movie', verbose_name='Фильм', on_delete=models.CASCADE)
@@ -124,6 +136,10 @@ class UserReview(models.Model):
 
     def __str__(self):
         return f'{self.user.username}_{self.movie.title}_{self.rating}'
+
+    @classmethod
+    def get_user_reviews(cls, user_id):
+        return cls.objects.filter(user_id=user_id).prefetch_related('movie__images')
 
 
 class DailyRecommendation(models.Model):

@@ -1,18 +1,19 @@
+
 from rest_framework import serializers
 
 from film_recommender.models import DailyRecommendedFilm
 
 
 class DailyRecommendationSerializer(serializers.ModelSerializer):
-    tmbd_id = serializers.IntegerField(source='movie.tmbd_id')
+    tmdb_id = serializers.IntegerField(source='movie.tmdb_id')
 
     class Meta:
         model = DailyRecommendedFilm
-        fields = ['computed_rating', 'tmbd_id', ]
+        fields = ['computed_rating', 'tmdb_id', ]
 
 
 class PredictUserFilmsRatingParamsSerializer(serializers.Serializer):
-    movie_ids = serializers.CharField(required=True, help_text='movies tmbd_ids')
+    movie_ids = serializers.CharField(required=True, help_text='movies tmdb_ids')
 
     class Meta:
         fields = ['movie_ids', ]
@@ -23,8 +24,8 @@ class PredictUserFilmsRatingParamsSerializer(serializers.Serializer):
 
 
 class PredictedFilmSerializer(serializers.Serializer):
-    tmbd_id = serializers.IntegerField()
+    tmdb_id = serializers.IntegerField()
     predicted_rating = serializers.FloatField()
 
     class Meta:
-        fields = ['tmbd_id', 'predicted_rating']
+        fields = ['tmdb_id', 'predicted_rating']
