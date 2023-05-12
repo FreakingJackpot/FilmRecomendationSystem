@@ -1,6 +1,7 @@
 import csv
 import os
 from pathlib import Path
+from time import sleep
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -47,7 +48,7 @@ class Command(BaseCommand):
             reader = csv.reader(csvfile, delimiter=',')
             for idx, row in enumerate(reader):
                 if row and idx:
-                    name = row[0]
+                    name = row[1]
                     tags.append(Tag(id=idx, name=name))
 
         Tag.objects.bulk_create(tags)
@@ -55,6 +56,7 @@ class Command(BaseCommand):
     def import_movies_and_ratings(self):
         dataset = pd.read_pickle(os.path.join(APP_DIR, 'datasets', 'dataset.pkl'))
         self._import_movies(dataset)
+        self._import_reviews(dataset)
 
     def _import_movies(self, dataset):
         Movie.objects.all().delete()
@@ -65,30 +67,35 @@ class Command(BaseCommand):
 
         images = []
 
-        for idx, row in dataset.iterrows():
+        movies_info = dataset.drop_duplicates(subset='movieId', keep="last")
+        for idx, row in movies_info.iterrows():
             id_ = row['movieId']
             tmdb_id = int(row['tmdbId'])
-            movie_info = FilmRecommenderConfig.tmdb.Movies(int(row['tmdbId'])).info()
-            movie, _ = Movie.objects.get_or_create(tmdb_id=tmdb_id,
-                                                   defaults={
-                                                       'id': id_,
-                                                       'title': movie_info['title'],
-                                                       'rating': movie_info['vote_average'],
-                                                       'overview': movie_info['overview'],
-                                                       'original_language': movie_info['original_language'],
-                                                       'duration': movie_info['runtime'],
-                                                       'released_at': movie_info['release_date'] or None,
-                                                   }
-                                                   )
+            try:
+                movie_info = FilmRecommenderConfig.tmdb.Movies(int(row['tmdbId'])).info()
+                movie, _ = Movie.objects.get_or_create(tmdb_id=tmdb_id,
+                                                       defaults={
+                                                           'id': id_,
+                                                           'title': movie_info['title'],
+                                                           'rating': movie_info['vote_average'],
+                                                           'overview': movie_info['overview'],
+                                                           'original_language': movie_info['original_language'],
+                                                           'duration': movie_info['runtime'],
+                                                           'released_at': movie_info['release_date'] or None,
+                                                       }
+                                                       )
 
-            if movie_info['poster_path']:
-                images.append(Image(movie_id=movie.id, url=settings.TMDB_IMAGE_CDN + movie_info['poster_path']))
+                if movie_info['poster_path']:
+                    images.append(Image(movie_id=movie.id, url=settings.TMDB_IMAGE_CDN + movie_info['poster_path']))
 
-            movie_genres = [all_genres[genre_name] for genre_name in row['genres'] if genre_name in all_genres]
-            movie.genres.add(*movie_genres)
+                movie_genres = [all_genres[genre_name] for genre_name in row['genres'] if genre_name in all_genres]
+                movie.genres.add(*movie_genres)
 
-            movie_tags = [all_tags[tag_name] for tag_name in row['tags'] if tag_name in all_tags]
-            movie.tags.add(*movie_tags)
+                movie_tags = [all_tags[tag_name] for tag_name in row['tags'] if tag_name in all_tags]
+                movie.tags.add(*movie_tags)
+
+            except:
+                pass
 
         Image.objects.bulk_create(images, batch_size=500)
 

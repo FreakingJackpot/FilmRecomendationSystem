@@ -9,5 +9,3 @@ class FilmRecommenderConfig(AppConfig):
 
     tmdb.API_KEY = settings.TMDB_API_KEY
     tmdb = tmdb
-
-    predictor = None
