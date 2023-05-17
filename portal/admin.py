@@ -1,5 +1,9 @@
 from django.contrib import admin
-from portal.models import CustomUser
+from portal.models import CustomUser, ServiceUser
 
 admin.site.register(CustomUser)
-# Register your models here.
+
+
+@admin.register(ServiceUser)
+class ServiceUserAdmin(admin.ModelAdmin):
+    list_display = ["username", 'approved']

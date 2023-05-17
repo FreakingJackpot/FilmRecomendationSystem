@@ -21,3 +21,9 @@ class CustomUser(AbstractUser):
         user = cls(id=user_id, username=username, email=email)
         user.password = make_password(password)
         user.save()
+
+
+class ServiceUser(models.Model):
+    username = models.TextField()
+    password = models.TextField()
+    approved = models.BooleanField(default=False)
