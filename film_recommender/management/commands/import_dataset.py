@@ -1,7 +1,6 @@
 import csv
 import os
 from pathlib import Path
-from time import sleep
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -29,14 +28,14 @@ class Command(BaseCommand):
         Genre.objects.all().delete()
         genres = []
 
-        with open(os.path.join(APP_DIR, 'datasets', 'ml-100k', 'u.genre')) as csvfile:
-            reader = csv.reader(csvfile, delimiter='|')
+        with open(os.path.join(APP_DIR, 'datasets', 'genres.csv')) as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            next(reader)
             for row in reader:
                 if row:
-                    id_ = row[1]
-                    if id_ != '0':
-                        name = row[0]
-                        genres.append(Genre(id=id_, name=name))
+                    id_ = int(row[0]) + 1
+                    name = row[1]
+                    genres.append(Genre(id=id_, name=name))
 
         Genre.objects.bulk_create(genres)
 

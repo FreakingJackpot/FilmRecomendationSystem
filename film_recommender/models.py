@@ -48,11 +48,11 @@ class Movie(models.Model):
     @staticmethod
     def set_predictions_on_movies_for_user(movies, user_id):
         if movies:
-            movie_ids = [movie.id for movie in movies]
-            predictions = Predictor.predict(user_id, movie_ids)
+            movie_by_id = {movie.id: movie for movie in movies}
+            predictions = Predictor.predict(user_id, tuple(movie_by_id.keys()))
 
-            for movie, prediction in zip(movies, predictions):
-                movie.predicted_rating = prediction
+            for prediction in predictions:
+                movie_by_id[prediction['movie_id']].predicted_rating = prediction['rating']
 
     @classmethod
     def get_k_most_rated_without_review_for_each_genre(cls, user_id, exclude_movie_ids):

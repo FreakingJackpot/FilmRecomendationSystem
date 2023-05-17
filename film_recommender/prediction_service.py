@@ -12,14 +12,17 @@ class Predictor:
 
     @classmethod
     def predict(cls, user_id, movies_ids):
+        predictions = []
         for chunk in chunks(movies_ids, cls._batch_size):
-            return PredictionService.predict(user_id, chunk)
+            predictions.extend(PredictionService.predict(user_id, chunk))
+
+        return predictions
 
     @classmethod
     def get_top_k(cls, user_id, movies_ids, k):
-        predictions = PredictionService.predict(user_id, movies_ids)
-        top_k = sorted(zip(movies_ids, predictions), key=lambda x: x[1], reverse=True)[:k]
-        return top_k
+        predictions = cls.predict(user_id, movies_ids)
+        top_k = sorted(predictions, key=lambda x: x['rating'], reverse=True)[:k]
+        return [prediction['movie_id'] for prediction in top_k]
 
 
 class PredictionService:
