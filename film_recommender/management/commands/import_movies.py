@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     _batch_size_limit = 500
 
-    _objects_limit = 50
+    _objects_limit = 500
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
 
