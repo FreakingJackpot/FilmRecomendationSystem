@@ -4,10 +4,11 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from portal.models import CustomUser
-from film_recommender.models import Movie, FavouriteGenre, DailyRecommendation, DailyRecommendedFilm
+from film_recommender.models import Movie, FavouriteGenre, DailyRecommendedFilm
 from film_recommender.prediction_service import Predictor
 
 APP_DIR = Path(__file__).resolve().parent.parent.parent
+
 
 class Command(BaseCommand):
 
@@ -53,14 +54,12 @@ class Command(BaseCommand):
         return predicted_movie_ids
 
     def _create_recomendation(self, user_id, predictions):
-        recommendation, _ = DailyRecommendation.objects.get_or_create(user_id=user_id)
-
-        DailyRecommendedFilm.objects.filter(recommendation=recommendation).delete()
+        DailyRecommendedFilm.objects.filter(user_id=user_id).delete()
 
         recommended_films = []
         for prediction in predictions:
-            recommended_films.append(DailyRecommendedFilm(recommendation=recommendation, movie_id=prediction[0],
-                                                          computed_rating=prediction[1])
-                                     )
+            recommended_films.append(
+                DailyRecommendedFilm(user_id=user_id, movie_id=prediction[0], computed_rating=prediction[1])
+            )
 
         DailyRecommendedFilm.objects.bulk_create(recommended_films)

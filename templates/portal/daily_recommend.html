@@ -15,7 +15,7 @@
     <div class="album py-5 bg-light">
         <div class="container">
             <div class="row">
-                {% for recommended_film in daily_recommendation.movies.all %}
+                {% for recommended_film in page_obj %}
                     <div class="col-sm-3 g-2">
 
                         <div class="card" style="width: 18rem;">

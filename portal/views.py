@@ -1,10 +1,10 @@
-from django.views.generic import View, ListView, DetailView
+from django.views.generic import View, ListView
 from django.shortcuts import render, get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
-from film_recommender.models import Movie, UserReview, Genre, DailyRecommendation
+from film_recommender.models import Movie, UserReview, Genre, DailyRecommendedFilm
 
 
 # Create your views here.
@@ -57,25 +57,13 @@ class GenreView(ListView):
         return context
 
 
-class DailyRecommendView(DetailView):
+class DailyRecommendView(ListView):
     template_name = 'portal/daily_recommend.html'
-    model = DailyRecommendation
+    model = DailyRecommendedFilm
     context_object_name = 'daily_recommendation'
 
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-
-        try:
-            # Get the single item from the filtered queryset
-            obj = queryset.get()
-        except queryset.model.DoesNotExist:
-            obj = None
-        return obj
-
     def get_queryset(self):
-        user = self.request.user
-        queryset = self.model.objects.prefetch_related('movies__movie__genres').filter(user=user)
+        queryset = self.model.get_user_recommendations(self.request.user.id)
         return queryset
 
 

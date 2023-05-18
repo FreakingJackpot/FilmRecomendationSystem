@@ -150,10 +150,10 @@ PREDICT_SERVICE_PASSWORD = 'portal123'
 
 PREDICTOR_SERVICE_URL = 'http://127.0.0.1:5000/'
 PREDICTOR_SERVICE_LOGIN_URL = PREDICTOR_SERVICE_URL + 'users/login'
-PREDICTOR_SERVICE_PREDICT_URL = PREDICTOR_SERVICE_URL + 'predict/'
+PREDICTOR_SERVICE_PREDICT_URL = PREDICTOR_SERVICE_URL + 'predictor/'
 
-CELERY_BROKER_URL = 'pyamqp://localhost'
-CELERY_RESULT_BACKEND = 'rpc://localhost'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
@@ -166,10 +166,6 @@ MODEL_DIR = os.path.join(BASE_DIR, 'film_recommender', 'outputs', 'model')
 TOP_K = 12
 
 CELERY_BEAT_SCHEDULE = {
-    "quack": {
-        "task": "film_recommender.tasks.quack",
-        "schedule": crontab(minute='*/1'),
-    },
     "import_genres": {
         "task": "film_recommender.tasks.import_genres",
         "schedule": crontab(hour=8),
@@ -177,10 +173,6 @@ CELERY_BEAT_SCHEDULE = {
     "import_movies": {
         "task": "film_recommender.tasks.import_movies",
         "schedule": crontab(hour=9),
-    },
-    "train_model": {
-        "task": "film_recommender.tasks.train_model",
-        "schedule": crontab(minute='*/60'),
     },
     "predict_daily_recommends": {
         "task": "film_recommender.tasks.predict_daily_recommends",

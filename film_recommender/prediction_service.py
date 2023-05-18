@@ -1,4 +1,4 @@
-from requests import get, post
+from requests import get, post,RequestException
 from django.conf import settings
 
 
@@ -32,13 +32,16 @@ class PredictionService:
 
     @classmethod
     def _login(cls):
-        response = post(cls._login_url,
-                        json={
-                            'username': settings.PREDICT_SERVICE_USERNAME,
-                            'password': settings.PREDICT_SERVICE_PASSWORD
-                        })
-        data = response.json()
-        cls._token = data['token']
+        try:
+            response = post(cls._login_url,
+                            json={
+                                'username': settings.PREDICT_SERVICE_USERNAME,
+                                'password': settings.PREDICT_SERVICE_PASSWORD
+                            })
+            data = response.json()
+            cls._token = data['token']
+        except RequestException as e:
+            print(e)
 
     @classmethod
     def predict(cls, user_id, movies_ids):
@@ -55,7 +58,8 @@ class PredictionService:
                            },
                            headers={'Authorization': 'Token ' + cls._token})
             data = response.json()
-        except:
-            pass
+
+        except RequestException as e:
+            print(e)
 
         return data['predictions']

@@ -142,20 +142,8 @@ class UserReview(models.Model):
         return cls.objects.filter(user_id=user_id).prefetch_related('movie__images')
 
 
-class DailyRecommendation(models.Model):
-    user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = 'Ежедневная рекомендация'
-        verbose_name_plural = 'Ежедневные рекомендации'
-
-    def __str__(self):
-        return f'{self.user.username}'
-
-
 class DailyRecommendedFilm(models.Model):
-    recommendation = models.ForeignKey('DailyRecommendation', related_name='movies', verbose_name='рекомендация',
-                                       on_delete=models.CASCADE)
+    user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
     movie = models.ForeignKey('Movie', verbose_name='Фильм дня', related_name='recommended_movies',
                               on_delete=models.CASCADE)
     computed_rating = models.FloatField()
@@ -166,6 +154,11 @@ class DailyRecommendedFilm(models.Model):
 
     def __str__(self):
         return f'{self.recommendation.user.username}_{self.movie.title}_{self.computed_rating}'
+
+    @classmethod
+    def get_user_recommendations(cls, user_id):
+        return cls.objects.filter(user_id=user_id).prefetch_related('movie__image').prefetch_related(
+            'movies__movie__genres')
 
 
 class FavouriteGenre(models.Model):
