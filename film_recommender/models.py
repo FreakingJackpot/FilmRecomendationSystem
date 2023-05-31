@@ -141,6 +141,31 @@ class UserReview(models.Model):
     def get_user_reviews(cls, user_id):
         return cls.objects.filter(user_id=user_id).prefetch_related('movie__images')
 
+    @classmethod
+    def create_user_reviews(cls, user_id, data):
+        movie_id_by_tmdb_id = dict(
+            cls.objects.filter(movie__tmdb_id__in=[i['tmdb_id'] for i in data]).values_list('movie__tmdb_id',
+                                                                                            'movie_id')
+        )
+        objects = [
+            cls(movie_id=movie_id_by_tmdb_id.get(item['tmdb_id']), user_id=user_id, rating=item['rating']) for
+            item in data
+        ]
+
+        cls.objects.bulk_create(objects)
+
+    @classmethod
+    def update_user_reviews(cls, user_id, data):
+        reviews = cls.objects.filter(user_id=user_id, movie__tmdb_id__in=[i['tmdb_id'] for i in data]).select_related(
+            'movie')
+        review_by_tmdb_id = {review.movie.tmdb_id: review for review in reviews}
+
+        for item in data:
+            review = review_by_tmdb_id.get(item['tmdb_id'])
+            review.rating = item['rating']
+
+        cls.objects.bulk_update(review_by_tmdb_id.values(), fields=['rating', ])
+
 
 class DailyRecommendedFilm(models.Model):
     user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
