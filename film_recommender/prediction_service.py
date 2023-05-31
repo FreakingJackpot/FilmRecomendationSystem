@@ -1,4 +1,4 @@
-from requests import get, post,RequestException
+from requests import get, post, RequestException
 from django.conf import settings
 
 
@@ -49,17 +49,18 @@ class PredictionService:
             cls._login()
 
         data = {'predictions': []}
+        if cls._token:
 
-        try:
-            response = get(cls._predictor_url,
-                           params={
-                               'user_id': user_id,
-                               'movie_ids': ','.join(map(str, movies_ids)),
-                           },
-                           headers={'Authorization': 'Token ' + cls._token})
-            data = response.json()
+            try:
+                response = get(cls._predictor_url,
+                               params={
+                                   'user_id': user_id,
+                                   'movie_ids': ','.join(map(str, movies_ids)),
+                               },
+                               headers={'Authorization': 'Token ' + cls._token})
+                data = response.json()
 
-        except RequestException as e:
-            print(e)
+            except RequestException as e:
+                print(e)
 
         return data['predictions']
