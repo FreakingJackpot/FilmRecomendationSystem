@@ -3,6 +3,10 @@
 {% load static %}
 {% load i18n %}
 
+{% block head %}
+    <title>{{ movie.title }}</title>
+{% endblock %}
+
 {% block active_menu %}
     <li><a class="dropdown-item " href="{% url 'portal:home' %}">{% translate 'HomeTab' %}</a></li>
     <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">{% translate 'Daily picks for you' %}</a>
@@ -47,7 +51,7 @@
                             <div class="rating">
                                 <div class="movie-rating" data-nosnippet="">
                                     <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>&nbsp;
-                                    <span class="rating">{{ movie.rating }}</span>
+                                    <span class="rating">{{ movie.rating | floatformat:-2 }}</span>
                                     <span>TMDB</span>
                                 </div>
                             </div>

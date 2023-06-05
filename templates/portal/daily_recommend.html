@@ -2,6 +2,9 @@
 {% load static %}
 {% load i18n %}
 
+{% block head %}
+    <title>{% translate 'Daily picks for you' %}</title>
+{% endblock %}
 
 {% block active_menu %}
     <li><a class="dropdown-item" href="{% url 'portal:home' %}">{% translate 'HomeTab' %}</a></li>

@@ -3,6 +3,10 @@
 {% load static %}
 {% load i18n %}
 
+{% block head %}
+    <title>{% translate 'Genres' %}</title>
+{% endblock %}
+
 {% block active_menu %}
     <li><a class="dropdown-item" href="{% url 'portal:home' %}">{% translate 'HomeTab' %}</a></li>
     <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">{% translate 'Daily picks for you' %}</a>
