@@ -35,8 +35,8 @@ class Movie(TranslatableModel):
 
     @classmethod
     def get_most_related_without_review(cls, user_id):
-        movies = cls.objects.prefetch_related('translations', 'genres__translations').exclude(
-            userreview__user_id=user_id).order_by('-rating')
+        movies = cls.objects.prefetch_related('translations').exclude(
+            userreview__user_id=user_id).defer('duration', 'released_at').order_by('-rating')
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
 
@@ -72,23 +72,25 @@ class Movie(TranslatableModel):
 
     @classmethod
     def get_most_rated_without_review_for_genre(cls, user_id, genre):
-        movies = cls.objects.prefetch_related('translations', 'genres__translations').filter(genres=genre).exclude(
+        movies = cls.objects.prefetch_related('translations').filter(genres=genre).exclude(
             userreview__user_id=user_id).order_by('-rating')
 
         return movies
 
     @classmethod
     def get_same_genres_recommends(cls, user_id, movie_id, genres):
-        movies = cls.objects.exclude(id=movie_id, userreview__user_id=user_id).filter(genres__in=genres)[
+        movies = cls.objects.exclude(id=movie_id, userreview__user_id=user_id) \
+                     .filter(genres__in=genres).defer('duration', 'released_at')[
                  :settings.TOP_K]
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
 
     @classmethod
     def search(cls, user_id, text):
-        movies = cls.objects.filter(title__icontains=text)
+        movies = cls.objects.filter(title__icontains=text).defer('duration', 'released_at')
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
+
 
 class Genre(TranslatableModel):
     translations = TranslatedFields(
@@ -130,7 +132,7 @@ class UserReview(models.Model):
 
     @classmethod
     def get_user_reviews(cls, user_id):
-        return cls.objects.filter(user_id=user_id).prefetch_related('movies__translations')
+        return cls.objects.filter(user_id=user_id).prefetch_related('movie__translations')
 
     @classmethod
     def create_user_reviews(cls, user_id, data):
@@ -148,7 +150,7 @@ class UserReview(models.Model):
     @classmethod
     def update_user_reviews(cls, user_id, data):
         reviews = cls.objects.filter(user_id=user_id, movie__tmdb_id__in=[i['tmdb_id'] for i in data]).select_related(
-            'movie')
+            'movie').only('rating', 'movie__tmdb_id')
         review_by_tmdb_id = {review.movie.tmdb_id: review for review in reviews}
 
         for item in data:

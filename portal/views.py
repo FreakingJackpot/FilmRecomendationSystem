@@ -26,7 +26,7 @@ class HomeView(View):
 
 class DetailMovieView(View):
     def get(self, request, id):
-        movie = get_object_or_404(Movie, id=id)
+        movie = get_object_or_404(Movie.objects.prefetch_related('translations'), id=id)
         Movie.set_predictions_on_movies_for_user([movie, ], request.user.id)
         same_genres_recommends = Movie.get_same_genres_recommends(request.user.id, movie_id=id,
                                                                   genres=movie.genres.all())
