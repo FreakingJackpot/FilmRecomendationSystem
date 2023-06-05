@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'authentication',
     'crispy_forms',
     "corsheaders",
+    'rosetta',
+    'parler',
 ]
 
 MIDDLEWARE = [
@@ -38,6 +40,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'login_required.middleware.LoginRequiredMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -107,10 +110,27 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+LANGUAGES = [
+    ('en-us', 'English'),
+    ('ru', 'Russian')
+]
+PARLER_LANGUAGES = {
+    None: (
+        {'code': 'en-us', },
+        {'code': 'ru', },
+    ),
+    'default': {
+        'fallbacks': ['en-us'],
+        'hide_untranslated': False,
+    }
+}
 
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale'), ]
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 

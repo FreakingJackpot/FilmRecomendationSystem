@@ -1,13 +1,15 @@
 {% extends 'portal/base.html' %}
 {% load crispy_forms_filters %}
 {% load static %}
+{% load i18n %}
 
 {% block body %}
-    <h2 class="category" align="center">Top rated</h2>
-    {% include 'portal/posters_layout.html' with movies=most_rated_movies %}
+    <h2 class="category" align="center">{% translate 'Top rated' %}</h2>
+    {% translate 'Predicted' as rating_text %}
+    {% include 'portal/posters_layout.html' with movies=most_rated_movies user_rating_text=rating_text %}
 
     {% for genre, movies in most_rated_by_genres.items %}
         <h2 class="category" align="center">{{ genre }}</h2>
-        {% include 'portal/posters_layout.html' with movies=movies %}
+        {% include 'portal/posters_layout.html' with movies=movies  user_rating_text=rating_text %}
     {% endfor %}
 {% endblock %}

@@ -1,7 +1,9 @@
+from django.conf import settings
+from django.utils import translation
 from django.shortcuts import render
 from rest_framework.authtoken.models import Token
 
-from account.forms import ChangeEmailForm, ChangePasswordForm, FavouriteGenresForm
+from account.forms import ChangeEmailForm, ChangePasswordForm, FavouriteGenresForm, LanguagesForm
 from film_recommender.models import FavouriteGenre
 
 
@@ -56,3 +58,21 @@ def generate_api_token(request):
 
     context = {'token': token}
     return render(request, 'account/generate_api_token.html', context)
+
+
+def languages(request):
+    if request.method == 'POST':
+        form = LanguagesForm(request.POST)
+
+        if form.is_valid():
+            user_language = form.cleaned_data['language']
+            translation.activate(user_language)
+
+        response = render(request, 'account/languages.html', {'form': form})
+        response.set_cookie(settings.LANGUAGE_COOKIE_NAME, translation.get_language())
+    else:
+        initial = {'language': translation.get_language()}
+        form = LanguagesForm(initial=initial)
+        response = render(request, 'account/languages.html', {'form': form})
+
+    return response

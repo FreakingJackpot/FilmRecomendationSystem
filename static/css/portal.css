@@ -28,11 +28,11 @@
     font-size: 30px;
 }
 
-.computed-movie-rating {
+.user-movie-rating {
     font-size: 30px;
 }
 
-.computed-movie-rating:after {
+.user-movie-rating:after {
     content: "✭";
 }
 

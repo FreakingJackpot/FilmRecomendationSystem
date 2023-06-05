@@ -3,39 +3,7 @@
         <div class="row">
             {% for movie in movies %}
                 <div class="col-sm-3 g-2">
-
-                    <div class="card" style="width: 18rem;">
-
-                        {% if movie.images.first.url %}
-                            <img src="{{ movie.images.first.url }}" class="card-img-top">
-                        {% else %}
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="429"
-                                 xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                                 preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                                <rect width="100%" height="100%" fill="#868e96"></rect>
-                                <text x="37%" y="50%" fill="#dee2e6" dy=".3em">Not Found</text>
-                            </svg>
-                        {% endif %}
-                        <div class="card-body">
-                            <a href="{% url 'portal:movie-detail' movie.id %}">
-                                <p class="card-text">{{ movie.title }}</p>
-                            </a>
-                            <div class="row ">
-                                <div class="col pt-10">
-                                    <div class="rating">
-                                        <p class="movie-rating">{{ movie.rating | floatformat:-2 }}</p>
-                                        <p class="movie-rating-text">TMDB</p>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="computed-rating text-end">
-                                        <p class="computed-movie-rating ">{{ movie.predicted_rating| floatformat:-2 }}</p>
-                                        <p class="movie-rating-text text-end">Predicted</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% include 'portal/card.html' with movie=movie user_rating_text=user_rating_text user_rating=movie.predicted_rating %}
                 </div>
             {% endfor %}
         </div>

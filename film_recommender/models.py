@@ -1,27 +1,28 @@
 from django.conf import settings
-from django.apps import apps
-from django.contrib.postgres.indexes import GinIndex
 from django.db import models
+from parler.models import TranslatableModel, TranslatedFields
 
 from film_recommender.prediction_service import Predictor
 
 
 # Create your models here.
-class Movie(models.Model):
-    title = models.TextField(verbose_name='Название')
+class Movie(TranslatableModel):
     genres = models.ManyToManyField('Genre', verbose_name='Жанры')
     tags = models.ManyToManyField('Tag', verbose_name='Теги')
     tmdb_id = models.IntegerField(db_index=True, unique=True)
     rating = models.FloatField(default=0)
-    overview = models.TextField(verbose_name='Сюжет', null=True, blank=True)
     duration = models.IntegerField(verbose_name='Продолжительность', null=True, blank=True)
-    original_language = models.CharField(max_length=255, verbose_name='Язык оригинала', null=True, blank=True)
-    released_at = models.DateTimeField(verbose_name='дата выхода', null=True, blank=True)
+    released_at = models.DateField(verbose_name='дата выхода', null=True, blank=True)
+
+    translations = TranslatedFields(
+        title=models.TextField(verbose_name='Название'),
+        overview=models.TextField(verbose_name='Сюжет', null=True, blank=True),
+        image_url=models.TextField(null=True, blank=True)
+    )
 
     class Meta:
         verbose_name = 'Фильм'
         verbose_name_plural = 'Фильмы'
-        indexes = [GinIndex(name='movie_title_gin', fields=['title']), ]
 
     def __str__(self):
         return self.title
@@ -34,8 +35,8 @@ class Movie(models.Model):
 
     @classmethod
     def get_most_related_without_review(cls, user_id):
-        movies = cls.objects.prefetch_related('images', 'genres').exclude(userreview__user_id=user_id).order_by(
-            '-rating')
+        movies = cls.objects.prefetch_related('translations', 'genres__translations').exclude(
+            userreview__user_id=user_id).order_by('-rating')
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
 
@@ -71,7 +72,7 @@ class Movie(models.Model):
 
     @classmethod
     def get_most_rated_without_review_for_genre(cls, user_id, genre):
-        movies = cls.objects.prefetch_related('images', 'genres').filter(genres=genre).exclude(
+        movies = cls.objects.prefetch_related('translations', 'genres__translations').filter(genres=genre).exclude(
             userreview__user_id=user_id).order_by('-rating')
 
         return movies
@@ -89,22 +90,10 @@ class Movie(models.Model):
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
 
-
-class Image(models.Model):
-    movie = models.ForeignKey('Movie', related_name='images', verbose_name='Фильм', on_delete=models.CASCADE)
-    url = models.TextField()
-    active = models.BooleanField(default=True, verbose_name='Активна')
-
-    class Meta:
-        verbose_name = 'Картинка'
-        verbose_name_plural = 'Картинки'
-
-    def __str__(self):
-        return self.movie.title
-
-
-class Genre(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=255)
+class Genre(TranslatableModel):
+    translations = TranslatedFields(
+        name=models.CharField(verbose_name='Название', max_length=255)
+    )
 
     class Meta:
         verbose_name = 'Жанр'
@@ -114,8 +103,10 @@ class Genre(models.Model):
         return self.name
 
 
-class Tag(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=255)
+class Tag(TranslatableModel):
+    translations = TranslatedFields(
+        name=models.CharField(verbose_name='Название', max_length=255)
+    )
 
     class Meta:
         verbose_name = 'Тег'
@@ -139,7 +130,7 @@ class UserReview(models.Model):
 
     @classmethod
     def get_user_reviews(cls, user_id):
-        return cls.objects.filter(user_id=user_id).prefetch_related('movie__images')
+        return cls.objects.filter(user_id=user_id).prefetch_related('movies__translations')
 
     @classmethod
     def create_user_reviews(cls, user_id, data):
@@ -171,18 +162,18 @@ class DailyRecommendedFilm(models.Model):
     user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
     movie = models.ForeignKey('Movie', verbose_name='Фильм дня', related_name='recommended_movies',
                               on_delete=models.CASCADE)
-    computed_rating = models.FloatField()
+    predicted_rating = models.FloatField()
 
     class Meta:
         verbose_name = 'Ежедневная рекомендация'
         verbose_name_plural = 'Ежедневные рекомендации'
 
     def __str__(self):
-        return f'{self.recommendation.user.username}_{self.movie.title}_{self.computed_rating}'
+        return f'{self.user.username}_{self.movie.title}_{self.predicted_rating}'
 
     @classmethod
     def get_user_recommendations(cls, user_id):
-        return cls.objects.filter(user_id=user_id).prefetch_related('movie__image').prefetch_related(
+        return cls.objects.filter(user_id=user_id).prefetch_related('movie__translations').prefetch_related(
             'movies__movie__genres')
 
 

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import password_validation, get_user_model
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.hashers import make_password
 
 UserModel = get_user_model()
@@ -15,7 +15,7 @@ class RegistrationForm(forms.Form):
         "username_already_exist": _("This username already have account"),
     }
 
-    username = forms.CharField(label='username', max_length=255)
+    username = forms.CharField(label=_('username'), max_length=255)
 
     email = forms.EmailField(
         label=_("Email"),

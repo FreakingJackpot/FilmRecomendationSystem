@@ -1,24 +1,25 @@
 {% extends 'authentication/base.html' %}
 {% load crispy_forms_filters %}
+{% load i18n %}
 
 {% block head %}
-    <title>Log in</title>
+    <title>{% translate 'Log in' %}</title>
 {% endblock %}
 
 {% block content %}
     <div class="content">
         <div class="auth-container">
             <div class="login-page">
-                <h3 class="page-description">Sign in</h3>
+                <h3 class="page-description">{% translate 'Sign in' %}</h3>
                 <form action="." method="post">
                     {% csrf_token %}
                     {{ form |crispy }}
-                    <input class="mt-2" type="submit" value="Submit">
+                    <input class="mt-2" type="submit" value={% translate "Submit" %}>
                 </form>
             </div>
             <p class="spaced">
-                <a href="{% url 'authentication:registration' %}">register</a> | <a
-                    href="{% url 'authentication:reset_password' %}">forgot password</a>
+                <a href="{% url 'authentication:registration' %}">{% translate 'register' %}</a> | <a
+                    href="{% url 'authentication:reset_password' %}">{% translate 'forgot password' %} </a>
             </p>
         </div>
     </div>

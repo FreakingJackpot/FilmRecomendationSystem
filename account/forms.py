@@ -1,10 +1,10 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth import password_validation, get_user_model
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.hashers import make_password
-from rest_framework.authtoken.models import Token
 
 from film_recommender.models import Genre, FavouriteGenre
 
@@ -87,6 +87,7 @@ class ChangePasswordForm(forms.Form):
 
 class FavouriteGenresForm(forms.Form):
     genres = forms.ModelMultipleChoiceField(
+        label=_("Genres"),
         queryset=Genre.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False
@@ -104,3 +105,9 @@ class FavouriteGenresForm(forms.Form):
         if genres:
             new_favourites = [FavouriteGenre(user=self.user, genre=genre) for genre in genres]
             FavouriteGenre.objects.bulk_create(new_favourites)
+
+
+class LanguagesForm(forms.Form):
+    language = forms.CharField(label=_('Choose your language'),
+                               widget=forms.Select(choices=settings.LANGUAGES))
+

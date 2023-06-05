@@ -1,15 +1,19 @@
 {% extends 'portal/base.html' %}
 {% load crispy_forms_filters %}
 {% load static %}
+{% load i18n %}
 
 {% block active_menu %}
-    <li><a class="dropdown-item " href="{% url 'portal:home' %}">Home</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:reviewed_films' %}">Reviewed films</a></li>
+    <li><a class="dropdown-item " href="{% url 'portal:home' %}">{% translate 'HomeTab' %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">{% translate 'Daily picks for you' %}</a>
+    </li>
+    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">{% translate 'Genres' %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:reviewed_films' %}">{% translate 'Reviewed films' %}</a></li>
 {% endblock %}
 
 {% block body %}
+    {% translate 'Predicted' as rating_text %}
+
     <div class="detail-card" movie-id="{{ movie.id }}">
         <div class="container">
             <div class="row">
@@ -17,22 +21,25 @@
                     <div class="col-md-7 col-sm-2 col-ms-3 col-xs-12 column-img">
                         <div class="column-img-c">
                             <div class="img-c">
-                                {% if movie.images.first.url %}
-                                    <img src="{{ movie.images.first.url }}" class="card-img-top mt-2">
+
+                                {% if movie.image_url %}
+                                    <img src="{{ movie.image_url }}" class="card-img-top mt-2">
                                 {% else %}
                                     <svg class="bd-placeholder-img card-img-top" width="100%" height="429"
                                          xmlns="http://www.w3.org/2000/svg" role="img"
                                          aria-label="Placeholder: Image cap"
                                          preserveAspectRatio="xMidYMid slice" focusable="false"><title>
-                                        Placeholder</title>
+                                        {% translate 'Placeholder' %}</title>
                                         <rect width="100%" height="100%" fill="#868e96"></rect>
-                                        <text x="37%" y="50%" fill="#dee2e6" dy=".3em">Not Found</text>
+                                        <text x="37%" y="50%" fill="#dee2e6"
+                                              dy=".3em">{% translate 'Not Found' %}</text>
                                     </svg>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="col">
                     <h1 class="title">{{ movie.title }}</h1>
                     <div class="row">
@@ -41,16 +48,17 @@
                                 <div class="movie-rating" data-nosnippet="">
                                     <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>&nbsp;
                                     <span class="rating">{{ movie.rating }}</span>
-                                    <span>TMBD</span>
+                                    <span>TMDB</span>
                                 </div>
                             </div>
                         </div>
+
                         <div class="col">
                             <div class="rating">
                                 <div class="movie-rating" data-nosnippet="">
                                     <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>&nbsp;
                                     <span class="rating">{{ movie.predicted_rating| floatformat:-2 }}</span>
-                                    <span>Predicted</span>
+                                    <span>{{ rating_text }}</span>
                                 </div>
                             </div>
                         </div>
@@ -60,25 +68,25 @@
                         <div class="row">
                             <div class="col-md-10 col-sm-10 col-ms-9 col-xs-12 g-10">
                                 <div class="attr">
-                                    <span class="entry">Genres:</span> <span
+                                    <span class="entry">{% translate 'Genres' %}:</span> <span
                                         class="value">{{ movie.genres.all|join:',' }}</span>
                                 </div>
                                 <div class="attr">
-                                    <span class="entry">Tags:</span> <span
+                                    <span class="entry">{% translate 'Tags' %}:</span> <span
                                         class="value">{{ movie.tags.all|join:',' }}</span>
                                 </div>
                                 <div class="attr">
-                                    <span class="entry">Duration:</span> <span
-                                        class="value">{{ movie.duration }} min.</span>
+                                    <span class="entry">{% translate 'Duration' %}:</span> <span
+                                        class="value">{{ movie.duration }} {% translate 'min' %}.</span>
                                 </div>
                             </div>
                             <div class="col-md-10 col-sm-10 col-ms-9 col-xs-12 mt-5">
                                 <div class="attr">
-                                    <span class="entry">Release date:</span> <span
+                                    <span class="entry">{% translate 'Release date' %}:</span> <span
                                         class="value">{{ movie.released_at }}</span>
                                 </div>
                                 <div class="attr attr-story">
-                                    <span class="entry">Story:</span>
+                                    <span class="entry">{% translate 'Overview' %}:</span>
                                     <span class="value">{{ movie.overview }}</span>
                                 </div>
                             </div>
@@ -86,13 +94,14 @@
                     </div>
 
                     <div class="user-rating mt-4">
-                        <h2>Rate this film!</h2>
+                        <h2>{% translate 'RateFilmMessage' %}</h2>
+                        {% translate 'Give' as give %}
                         <div class="rating rating2">
-                            <a href="#5" title="Give 5 stars" data-value="5">★</a>
-                            <a href="#4" title="Give 4 stars" data-value="4">★</a>
-                            <a href="#3" title="Give 3 stars" data-value="3">★</a>
-                            <a href="#2" title="Give 2 stars" data-value="2">★</a>
-                            <a href="#1" title="Give 1 star" data-value="1">★</a>
+                            <a href="#5" title="{{ give }}  5" data-value="5">★</a>
+                            <a href="#4" title="{{ give }}  4" data-value="4">★</a>
+                            <a href="#3" title="{{ give }}  3" data-value="3">★</a>
+                            <a href="#2" title="{{ give }}  2" data-value="2">★</a>
+                            <a href="#1" title="{{ give }}  1" data-value="1">★</a>
                         </div>
                     </div>
                 </div>
@@ -116,6 +125,6 @@
         });
     </script>
 
-    <h2 class="category mt-3" align="center">Same genres</h2>
-    {% include 'portal/posters_layout.html' with movies=same_genres_recommends %}
+    <h2 class="category mt-3" align="center">{% translate 'Same genres' %}</h2>
+    {% include 'portal/posters_layout.html' with movies=same_genres_recommends user_rating_text=rating_text %}
 {% endblock %}

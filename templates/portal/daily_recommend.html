@@ -1,55 +1,25 @@
 {% extends 'portal/base.html' %}
 {% load static %}
+{% load i18n %}
 
 
 {% block active_menu %}
-    <li><a class="dropdown-item" href="{% url 'portal:home' %}">Home</a></li>
-    <li><a class="dropdown-item active" href="{% url 'portal:daily_recommend' %}" aria-current="page">Daily picks for
-        you</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:reviewed_films' %}">Reviewed films</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:home' %}">{% translate 'HomeTab' %}</a></li>
+    <li><a class="dropdown-item active" href="{% url 'portal:daily_recommend' %}"
+           aria-current="page">{% translate 'Daily picks for you' %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">{% translate 'Genres' %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:reviewed_films' %}">{% translate 'Reviewed films' %}</a></li>
 {% endblock %}
 
 {% block body %}
-    <h2 class="category" align="center">Recommends</h2>
+    <h2 class="category" align="center">{% translate 'Recommends' %}</h2>
     <div class="album py-5 bg-light">
         <div class="container">
+            {% translate 'Predicted' as rating_text %}
             <div class="row">
                 {% for recommended_film in page_obj %}
                     <div class="col-sm-3 g-2">
-
-                        <div class="card" style="width: 18rem;">
-
-                            {% if recommended_film.movie.images.first.url %}
-                                <img src="{{ recommended_film.movie.images.first.url }}" class="card-img-top">
-                            {% else %}
-                                <svg class="bd-placeholder-img card-img-top" width="100%" height="429"
-                                     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                                     preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                                    <rect width="100%" height="100%" fill="#868e96"></rect>
-                                    <text x="37%" y="50%" fill="#dee2e6" dy=".3em">Not Found</text>
-                                </svg>
-                            {% endif %}
-                            <div class="card-body">
-                                <a href="{% url 'portal:movie-detail' recommended_film.movie.id %}">
-                                    <p class="card-text">{{ recommended_film.movie.title }}</p>
-                                </a>
-                                <div class="row ">
-                                    <div class="col pt-10">
-                                        <div class="rating">
-                                            <p class="movie-rating">{{ recommended_film.movie.rating }}</p>
-                                            <p class="movie-rating-text">TMBD</p>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="computed-rating text-end">
-                                            <p class="computed-movie-rating ">{{ recommended_film.computed_rating| floatformat:-2 }}</p>
-                                            <p class="movie-rating-text text-end">Predicted</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        {% include 'portal/card.html' with movie=recommended_film.movie user_rating_text=rating_text user_rating=recommended_film.predicted_rating %}
                     </div>
                 {% endfor %}
             </div>

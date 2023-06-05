@@ -1,26 +1,30 @@
-{% extends 'portal/base.html' %}
+{% extends 'portal/genres.html' %}
 {% load crispy_forms_filters %}
 {% load static %}
+{% load i18n %}
 
 {% block active_menu %}
-    <li><a class="dropdown-item active" href="{% url 'portal:home' %}">Home</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">Daily picks for you</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:genres' %}">Genres</a></li>
-    <li><a class="dropdown-item" href="{% url 'portal:reviewed_films' %}">Reviewed films</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:home' %}">{% translate 'HomeTab' %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:daily_recommend' %}">{% translate 'Daily picks for you' %}</a>
+    </li>
+    <li><a class="dropdown-item active" href="{% url 'portal:genres' %}">{% translate 'Genres' %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'portal:reviewed_films' %}">{% translate 'Reviewed films' %}</a></li>
 {% endblock %}
 
 {% block body %}
     <h2 class="category" align="center">{{ genre_name }}</h2>
-    {% include 'portal/posters_layout.html' with movies=page_obj %}
+    {% translate 'Predicted' as rating_text %}
+    {% include 'portal/posters_layout.html' with movies=page_obj user_rating_text=rating_text %}
     <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-                <a class="page-link" href="?page=1">&laquo; First</a>
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                <a class="page-link" href="?page=1">&laquo; {% translate 'First' %}</a>
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% translate 'Previous' %}</a>
             {% endif %}
+
             {% if page_obj.has_next %}
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% translate 'Next' %}</a>
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{% translate 'Last' %} &raquo;</a>
             {% endif %}
         </ul>
     </nav>

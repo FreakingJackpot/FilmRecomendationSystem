@@ -1,8 +1,9 @@
 from django.contrib import admin
-from film_recommender.models import Movie, Genre, FavouriteGenre, DailyRecommendedFilm, Image
+from parler.admin import TranslatableAdmin
 
-admin.site.register(Movie)
-admin.site.register(Genre)
+from film_recommender.models import Movie, Genre, FavouriteGenre, DailyRecommendedFilm, Tag
+
+admin.site.register(Genre, TranslatableAdmin)
+admin.site.register(Tag, TranslatableAdmin)
 admin.site.register(FavouriteGenre)
 admin.site.register(DailyRecommendedFilm)
-admin.site.register(Image)

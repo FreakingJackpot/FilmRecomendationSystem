@@ -22,4 +22,5 @@ urlpatterns = [
     path('account/', include(('account.urls', 'account'), namespace='account')),
     path('', include(('portal.urls', 'portal'), namespace='portal')),
     path('api/', include(('api.urls', 'api'), namespace='api')),
+    path('rosetta/', include('rosetta.urls')),
 ]

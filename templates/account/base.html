@@ -1,9 +1,10 @@
 {% extends 'portal/base.html' %}
 {% load crispy_forms_filters %}
 {% load static %}
+{% load i18n %}
 
 {% block head %}
-    <title>Account</title>
+    <title>{% translate 'Account' %}</title>
     <link rel="stylesheet" href="{% static 'css/account.css' %}">
 
 {% endblock %}
@@ -11,7 +12,7 @@
     <div class="container light-style flex-grow-1 container-p-y">
 
         <h4 class="font-weight-bold py-3 mb-4">
-            Account settings
+            {% translate 'Account settings' %}
         </h4>
 
         <div class="card overflow-hidden">
@@ -34,7 +35,7 @@
                                         <form action="." method="post">
                                             {% csrf_token %}
                                             {{ form |crispy }}
-                                            <input class="mt-2 btn btn-primary" type="submit" value="Submit">
+                                            <input class="mt-2 btn btn-primary" type="submit" value={% translate "Submit" %}>
                                         </form>
                                     </div>
                                 {% endblock %}
