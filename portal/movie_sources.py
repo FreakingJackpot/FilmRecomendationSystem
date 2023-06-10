@@ -9,6 +9,7 @@ from pyyoutube import Api
 import requests
 from bs4 import BeautifulSoup
 from transliterate import translit
+from transliterate.exceptions import LanguageDetectionError
 
 from film_recommender.models import Movie
 from portal.models import YoutubeChannel
@@ -115,7 +116,11 @@ class Tvigle(MovieSourceInterface):
 
     @classmethod
     def search(cls, movie: Movie) -> Union[list[MovieUrl], MovieUrl, None]:
-        translited_title = translit(movie.title, reversed=True)
+        try:
+            translited_title = translit(movie.title, reversed=True)
+        except LanguageDetectionError:
+            translited_title = movie.title
+
         translited_title = translited_title.lower().replace(' ', '-')
 
         url = cls.url_template.format(slug=translited_title)
