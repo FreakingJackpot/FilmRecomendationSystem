@@ -1,10 +1,7 @@
 from requests import get, post, RequestException
 from django.conf import settings
 
-
-def chunks(iterable, size):
-    for i in range(0, len(iterable), size):
-        yield iterable[i:i + size]
+from film_recommender.services import chunks
 
 
 class Predictor:
@@ -22,7 +19,7 @@ class Predictor:
     def get_top_k(cls, user_id, movies_ids, k):
         predictions = cls.predict(user_id, movies_ids)
         top_k = sorted(predictions, key=lambda x: x['rating'], reverse=True)[:k]
-        return [prediction['movie_id'] for prediction in top_k]
+        return top_k
 
 
 class PredictionService:

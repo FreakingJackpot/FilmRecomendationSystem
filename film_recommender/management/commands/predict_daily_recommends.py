@@ -1,4 +1,6 @@
+from itertools import chain
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -6,60 +8,67 @@ from django.core.management.base import BaseCommand
 from account.models import CustomUser
 from film_recommender.models import Movie, FavouriteGenre, DailyRecommendedFilm
 from film_recommender.prediction_service import Predictor
+from film_recommender.services import chunks
 
 APP_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Command(BaseCommand):
+    _users_chunk = 500
+    _butch_size = 500
+    _count_with_favourite_genres = settings.TOP_K // 2
 
     def handle(self, *args, **options):
-        count_with_favourite_genres = settings.TOP_K // 2
+        user_ids = tuple(CustomUser.objects.values_list('id', flat=True).iterator())
+        with ThreadPoolExecutor() as executor:
+            for chunk in chunks(user_ids, self._users_chunk):
+                recommendations = chain(executor.map(self._get_user_recommendations, chunk))
+                DailyRecommendedFilm.objects.filter(user_id__in=chunk).delete()
+                DailyRecommendedFilm.objects.bulk_create(recommendations, butch_size=self._butch_size)
 
-        for user_id in CustomUser.objects.filter(id=3).values_list('id', flat=True):
-            movies = self._get_movies(user_id)
-            predictions = self._predict_movies(user_id, movies, count_with_favourite_genres)
-            self._create_recomendation(user_id, predictions)
+    def _get_user_recommendations(self, user_id):
+        movie_ids = self._get_movie_ids(user_id)
+        predictions = self._predict_movie_ids(user_id, movie_ids, self._count_with_favourite_genres)
+        return self._create_user_recomendations(user_id, predictions)
 
-    def _get_movies(self, user_id):
-        genres = FavouriteGenre.objects.filter(user_id=user_id).values_list('genre_id', flat=True)
+    def _get_movie_ids(self, user_id):
+        genre_ids = FavouriteGenre.objects.filter(user_id=user_id).values_list('genre_id', flat=True)
 
-        base_queryset = Movie.objects.prefetch_related('genres').only('id', 'genres__name').exclude(
-            userreview__user_id=user_id).order_by('-rating')
+        base_queryset = Movie.objects.exclude(userreview__user_id=user_id).order_by('-rating')
+        favourite_genre_movies = base_queryset.filter(genres__id__in=genre_ids).values_list('id', flat=True)
+        other_movies = base_queryset.values_list('id', flat=True)
 
-        favourite_genre_movies = base_queryset.filter(genres__in=genres).in_bulk()
-        other_movies = base_queryset.in_bulk()
+        return {'favourite_genre': tuple(favourite_genre_movies), 'other': list(other_movies)}
 
-        return {'favourite_genre': favourite_genre_movies, 'other': other_movies}
+    def _predict_movie_ids(self, user_id, movie_ids, count_with_favourite_genres):
+        predicted_movies = []
 
-    def _predict_movies(self, user_id, movies, count_with_favourite_genres):
-        predicted_movie_ids = []
-
-        if movies['favourite_genre']:
-            predicted_movie_ids.extend(Predictor.get_top_k(
-                movies['favourite_genre'].values(),
+        if movie_ids['favourite_genre']:
+            predicted_movies.extend(Predictor.get_top_k(
                 user_id,
+                movie_ids['favourite_genre'],
                 count_with_favourite_genres
             ))
 
-        k = settings.TOP_K - len(predicted_movie_ids)
-        for movie_id, _ in predicted_movie_ids:
-            movies['other'].pop(movie_id)
+        k = settings.TOP_K - len(predicted_movies)
+        for prediction in predicted_movies:
+            movie_ids['other'].remove(prediction['movie_id'])
 
-        predicted_movie_ids.extend(Predictor.get_top_k(
-            movies['other'].values(),
+        predicted_movies.extend(Predictor.get_top_k(
             user_id,
+            movie_ids['other'],
             k
         ))
 
-        return predicted_movie_ids
+        return predicted_movies
 
-    def _create_recomendation(self, user_id, predictions):
-        DailyRecommendedFilm.objects.filter(user_id=user_id).delete()
-
+    def _create_user_recomendations(self, user_id, predictions):
         recommended_films = []
         for prediction in predictions:
             recommended_films.append(
-                DailyRecommendedFilm(user_id=user_id, movie_id=prediction[0], computed_rating=prediction[1])
+                DailyRecommendedFilm(user_id=user_id,
+                                     movie_id=prediction['movie_id'],
+                                     predicted_rating=prediction['rating'])
             )
 
-        DailyRecommendedFilm.objects.bulk_create(recommended_films)
+        return recommended_films
