@@ -1,9 +1,5 @@
 from django.contrib import admin
-from portal.models import CustomUser, ServiceUser
 
-admin.site.register(CustomUser)
+from portal.models import YoutubeChannel
 
-
-@admin.register(ServiceUser)
-class ServiceUserAdmin(admin.ModelAdmin):
-    list_display = ["username", 'approved']
+admin.site.register(YoutubeChannel)

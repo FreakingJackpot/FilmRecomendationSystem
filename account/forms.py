@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.hashers import make_password
 
+from account.models import CustomUser
 from film_recommender.models import Genre, FavouriteGenre
 
 UserModel = get_user_model()
@@ -111,3 +112,8 @@ class LanguagesForm(forms.Form):
     language = forms.CharField(label=_('Choose your language'),
                                widget=forms.Select(choices=settings.LANGUAGES))
 
+
+class UserFeaturesForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['age', 'gender', 'country', 'occupation', ]

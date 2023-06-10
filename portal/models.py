@@ -1,29 +1,16 @@
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser
-
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
-# Create your models here.
+class YoutubeChannel(models.Model):
+    channel_id = models.TextField()
+    ru_name = models.TextField()
+    eng_name = models.TextField()
+    language_type = models.TextField()
 
-class CustomUser(AbstractUser):
-    favourite_genres = models.ManyToManyField(through='film_recommender.FavouriteGenre', to='film_recommender.Genre')
+    class Meta:
+        verbose_name_plural = _('Youtube сhannels')
+        verbose_name = _('Youtube сhannel')
 
-    @classmethod
-    def create_user_by_id(cls, user_id):
-        username = f'user_{user_id}'
-        password = f'PassWord_123_{user_id}'
-        email = f'user_{user_id}@yandex.ru'
-
-        email = cls.objects.normalize_email(email)
-
-        username = cls.normalize_username(username)
-        user = cls(id=user_id, username=username, email=email)
-        user.password = make_password(password)
-        user.save()
-
-
-class ServiceUser(models.Model):
-    username = models.TextField()
-    password = models.TextField()
-    approved = models.BooleanField(default=False)
+    def __str__(self):
+        return self.ru_name

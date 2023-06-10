@@ -128,7 +128,27 @@
             })
         });
     </script>
-
-    <h2 class="category mt-3" align="center">{% translate 'Same genres' %}</h2>
+    {% if urls %}
+        <h2 class="category" align="center">{% translate 'Free sources to view' %}</h2>
+        <table class="table table-hover">
+            <thead>
+            <tr class="table-header">
+                <th scope="col">#</th>
+                <th scope="col">{% translate 'Movie source' %}</th>
+                <th scope="col">{% translate 'Subtitles' %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for url in urls %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td><a href={{ url.url }}>{{ url.source_name }}</a></td>
+                    <td>{% if url.subtitles %} {% translate 'Yes' %} {% else %} {% translate 'No' %}  {% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    <h2 class="category" align="center">{% translate 'Same genres' %}</h2>
     {% include 'portal/posters_layout.html' with movies=same_genres_recommends user_rating_text=rating_text %}
 {% endblock %}

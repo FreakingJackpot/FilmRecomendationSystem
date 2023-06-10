@@ -3,7 +3,7 @@ from django.utils import translation
 from django.shortcuts import render
 from rest_framework.authtoken.models import Token
 
-from account.forms import ChangeEmailForm, ChangePasswordForm, FavouriteGenresForm, LanguagesForm
+from account.forms import ChangeEmailForm, ChangePasswordForm, FavouriteGenresForm, LanguagesForm, UserFeaturesForm
 from film_recommender.models import FavouriteGenre
 
 
@@ -60,7 +60,7 @@ def generate_api_token(request):
     return render(request, 'account/generate_api_token.html', context)
 
 
-def languages(request):
+def update_languages(request):
     if request.method == 'POST':
         form = LanguagesForm(request.POST)
 
@@ -76,3 +76,14 @@ def languages(request):
         response = render(request, 'account/languages.html', {'form': form})
 
     return response
+
+
+def update_user_features(request):
+    if request.method == 'POST':
+        form = UserFeaturesForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+    else:
+        form = UserFeaturesForm(instance=request.user)
+    return render(request, 'account/user_features.html', {'form': form})

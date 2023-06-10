@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import PasswordResetView, LoginView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView, LogoutView
 from django.shortcuts import redirect, render
@@ -40,7 +41,11 @@ def registration(request):
 
         if form.is_valid():
             form.save()
-            return redirect('authentication:login')
+            user = authenticate(username=form.cleaned_data['username'],
+                                password=form.cleaned_data['password1'],
+                                )
+            login(request, user)
+            return redirect('account:update_user_features')
     else:
         form = RegistrationForm()
 

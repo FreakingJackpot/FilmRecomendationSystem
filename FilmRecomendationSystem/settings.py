@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'rosetta',
     'parler',
+    'django_countries',
 ]
 
 MIDDLEWARE = [
@@ -103,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'portal.CustomUser'
+AUTH_USER_MODEL = 'account.CustomUser'
 
 LANGUAGE_CODE = 'en-us'
 
@@ -128,12 +129,12 @@ PARLER_LANGUAGES = {
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale'), ]
 USE_TZ = True
 
-
 STATIC_URL = 'static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -228,3 +229,5 @@ else:
             'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         }
     }
+
+YOUTUBE_API_KEY = 'AIzaSyCZMDmw56BMqWXP1_nuRhJQ5sgXo9StKbM'

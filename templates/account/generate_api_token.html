@@ -13,7 +13,9 @@
     <a class="list-group-item list-group-item-action active" data-toggle="list"
        href="{% url 'account:generate_api_token' %}">{% translate 'API Token Management' %}</a>
     <a class="list-group-item list-group-item-action" data-toggle="list"
-       href="{% url 'account:languages' %}">{% translate 'Languages' %}</a>
+       href="{% url 'account:update_languages' %}">{% translate 'Languages' %}</a>
+    <a class="list-group-item list-group-item-action" data-toggle="list"
+       href="{% url 'account:update_user_features' %}">{% translate 'About you' %}</a>
 {% endblock %}
 
 {% block main_activity %}

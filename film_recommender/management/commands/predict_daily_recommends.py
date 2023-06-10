@@ -3,7 +3,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from portal.models import CustomUser
+from account.models import CustomUser
 from film_recommender.models import Movie, FavouriteGenre, DailyRecommendedFilm
 from film_recommender.prediction_service import Predictor
 

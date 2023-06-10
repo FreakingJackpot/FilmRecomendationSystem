@@ -8,7 +8,7 @@ import pandas as pd
 
 from film_recommender.models import Genre, Movie, UserReview, Tag
 from film_recommender.apps import FilmRecommenderConfig
-from portal.models import CustomUser
+from account.models import CustomUser, Occupation
 
 APP_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -50,8 +50,16 @@ class Command(BaseCommand):
                     name = row[1]
                     Tag.objects.create(id=idx, name=name)
 
+    def import_occupations(self, dataset):
+        Occupation.objects.all().delete()
+        for idx, row in enumerate(list(dataset.occupation.unique()), 1):
+            if row and idx:
+                name = row
+                Occupation.objects.create(id=idx, name=name)
+
     def import_movies_and_ratings(self):
         dataset = pd.read_pickle(os.path.join(APP_DIR, 'datasets', 'dataset.pkl'))
+        self.import_occupations(dataset)
         self._import_movies(dataset)
         self._import_reviews(dataset)
 
@@ -99,12 +107,18 @@ class Command(BaseCommand):
         users = set()
         CustomUser.objects.exclude(username='admin').delete()
 
+        occupation_id_by_name = {occupation.name: occupation.id for occupation in Occupation.objects.all()}
+
         movies_ids = set(Movie.objects.values_list('id', flat=True))
 
         reviews = []
         for idx, row in dataset.iterrows():
             if not row[USER_COLUMN] in users:
-                CustomUser.create_user_by_id(row[USER_COLUMN])
+                CustomUser.create_test_user_by_id(row[USER_COLUMN],
+                                                  row['age'],
+                                                  row['gender'],
+                                                  occupation_id_by_name[row['occupation']],
+                                                  row['country'])
                 users.add(row[USER_COLUMN])
 
             if row[ITEM_COLUMN] in movies_ids:

@@ -6,14 +6,14 @@
 {% block category %}
     <a class="list-group-item list-group-item-action " data-toggle="list"
        href="{% url 'account:change_email' %}">{% translate 'Change Email' %}</a>
-    <a class="list-group-item list-group-item-action active" data-toggle="list"
+    <a class="list-group-item list-group-item-action " data-toggle="list"
        href="{% url 'account:change_password' %}">{% translate 'Change password' %}</a>
     <a class="list-group-item list-group-item-action" data-toggle="list"
        href="{% url 'account:manage_favourite_genres' %}">{% translate 'Add Favourite Genres' %}</a>
-    <a class="list-group-item list-group-item-action " data-toggle="list"
+    <a class="list-group-item list-group-item-action" data-toggle="list"
        href="{% url 'account:generate_api_token' %}">{% translate 'API Token Management' %}</a>
     <a class="list-group-item list-group-item-action" data-toggle="list"
        href="{% url 'account:update_languages' %}">{% translate 'Languages' %}</a>
-    <a class="list-group-item list-group-item-action" data-toggle="list"
+    <a class="list-group-item list-group-item-action active" data-toggle="list"
        href="{% url 'account:update_user_features' %}">{% translate 'About you' %}</a>
 {% endblock %}

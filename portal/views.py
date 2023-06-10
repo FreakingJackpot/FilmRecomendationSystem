@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
 from film_recommender.models import Movie, UserReview, Genre, DailyRecommendedFilm
+from portal.movie_sources import MovieUrlsManager
 
 
 # Create your views here.
@@ -28,9 +29,11 @@ class DetailMovieView(View):
     def get(self, request, id):
         movie = get_object_or_404(Movie.objects.prefetch_related('translations'), id=id)
         Movie.set_predictions_on_movies_for_user([movie, ], request.user.id)
+        urls = MovieUrlsManager.get_urls(movie)
         same_genres_recommends = Movie.get_same_genres_recommends(request.user.id, movie_id=id,
                                                                   genres=movie.genres.all())
-        return render(request, 'portal/detail.html', {'movie': movie, 'same_genres_recommends': same_genres_recommends})
+        context = {'movie': movie, 'urls': urls, 'same_genres_recommends': same_genres_recommends}
+        return render(request, 'portal/detail.html', context)
 
 
 class GenresView(ListView):

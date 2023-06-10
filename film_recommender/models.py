@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
 from film_recommender.prediction_service import Predictor
@@ -87,7 +88,7 @@ class Movie(TranslatableModel):
 
     @classmethod
     def search(cls, user_id, text):
-        movies = cls.objects.filter(title__icontains=text).defer('duration', 'released_at')
+        movies = cls.objects.filter(translations__title__icontains=text).defer('duration', 'released_at')
         cls.set_predictions_on_movies_for_user(movies, user_id)
         return movies
 
@@ -105,10 +106,8 @@ class Genre(TranslatableModel):
         return self.name
 
 
-class Tag(TranslatableModel):
-    translations = TranslatedFields(
-        name=models.CharField(verbose_name='Название', max_length=255)
-    )
+class Tag(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=255)
 
     class Meta:
         verbose_name = 'Тег'
@@ -119,7 +118,7 @@ class Tag(TranslatableModel):
 
 
 class UserReview(models.Model):
-    user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.ForeignKey('account.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
     movie = models.ForeignKey('Movie', verbose_name='Фильм', on_delete=models.CASCADE)
     rating = models.FloatField()
 
@@ -161,7 +160,7 @@ class UserReview(models.Model):
 
 
 class DailyRecommendedFilm(models.Model):
-    user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.ForeignKey('account.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
     movie = models.ForeignKey('Movie', verbose_name='Фильм дня', related_name='recommended_movies',
                               on_delete=models.CASCADE)
     predicted_rating = models.FloatField()
@@ -180,8 +179,12 @@ class DailyRecommendedFilm(models.Model):
 
 
 class FavouriteGenre(models.Model):
-    user = models.ForeignKey('portal.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.ForeignKey('account.CustomUser', verbose_name='Пользователь', on_delete=models.CASCADE)
     genre = models.ForeignKey('Genre', verbose_name='Жанры', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ['user', 'genre']
+        verbose_name_plural = _('Favourite genres')
+        verbose_name = _('Favourite genre')
+
+
