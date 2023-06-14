@@ -55,6 +55,8 @@ class RegistrationForm(forms.Form):
                 code="username_already_exist",
             )
 
+        return username
+
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
@@ -72,4 +74,6 @@ class RegistrationForm(forms.Form):
         username = self.cleaned_data['username']
         email = self.cleaned_data['email']
 
-        UserModel.objects.create(username=username, password=password, email=email)
+        last_user = UserModel.objects.last()
+        user = UserModel(id=last_user.id + 1, username=username, password=password, email=email)
+        user.save()

@@ -12,7 +12,6 @@ from django.conf import settings
 from film_recommender.models import Genre, Movie, Tag
 from film_recommender.apps import FilmRecommenderConfig
 
-MovieTranslationModel = Movie.translations.fields.model
 GenreThroughModel = Movie.genres.through
 TagThroughModel = Movie.tags.through
 
@@ -28,6 +27,8 @@ class Command(BaseCommand):
         'overview': 'overview',
         'poster_path': 'image_url'
     }
+
+    _youtube_watch_url = "https://www.youtube.com/watch?v={}"
 
     _batch_size_limit = 500
 
@@ -69,7 +70,9 @@ class Command(BaseCommand):
 
             tmdb_movie = FilmRecommenderConfig.tmdb.Movies(tmdb_id)
             movie_info = tmdb_movie.info()
+            self._set_trailer(tmdb_movie, movie_info, 'en')
             movie_info_ru = tmdb_movie.info(language='ru')
+            self._set_trailer(tmdb_movie, movie_info_ru, 'ru')
             languages_info = (('en-us', movie_info), ('ru', movie_info_ru))
 
             if tmdb_id in movies_in_db:
@@ -103,6 +106,13 @@ class Command(BaseCommand):
             self._update_models()
 
         self._update_models(import_end=True)
+
+    @staticmethod
+    def _set_trailer(tmdb_movie, movie_info, language_code):
+        for video in tmdb_movie.videos(language=language_code)['results']:
+            if video['type'] == 'Trailer' and video['site'] == 'YouTube':
+                movie_info['trailer'] = _youtube_watch_url.format(video['key'])
+                break
 
     @staticmethod
     def _update_movie_model(movie, movie_info, fields_map):
@@ -162,9 +172,9 @@ class Command(BaseCommand):
         if self._is_need_update((self.movies_to_update, self.translations_to_update), import_end):
             Movie.objects.bulk_update(self.movies_to_update, fields=self._tmdb_to_bd_fields.values(),
                                       batch_size=self._batch_size_limit)
-            MovieTranslationModel.objects.bulk_update(self.translations_to_update,
-                                                      fields=self._tmdb_to_db_translation_fields.values(),
-                                                      batch_size=self._batch_size_limit)
+            Movie.translations.fields.model.objects.bulk_update(self.translations_to_update,
+                                                                fields=self._tmdb_to_db_translation_fields.values(),
+                                                                batch_size=self._batch_size_limit)
 
     def _is_need_update(self, list_of_iters, import_end):
         return any(len(iter) >= self._objects_limit for iter in list_of_iters) or import_end
@@ -187,7 +197,7 @@ class Command(BaseCommand):
                 for obj in objects:
                     obj.master_id = movie_id
 
-                MovieTranslationModel.objects.bulk_create(chain(*items_dict.values()),
-                                                          batch_size=self._batch_size_limit)
+                Movie.translations.fields.model.objects.bulk_create(chain(*items_dict.values()),
+                                                                    batch_size=self._batch_size_limit)
 
             items_dict.clear()

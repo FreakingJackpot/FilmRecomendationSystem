@@ -20,7 +20,7 @@
         <div class="container">
             {% translate 'Predicted' as rating_text %}
             <div class="row">
-                {% for recommended_film in page_obj %}
+                {% for recommended_film in daily_recommendations %}
                     <div class="col-sm-3 g-2">
                         {% include 'portal/card.html' with movie=recommended_film.movie user_rating_text=rating_text user_rating=recommended_film.predicted_rating %}
                     </div>

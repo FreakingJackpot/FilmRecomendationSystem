@@ -1,8 +1,7 @@
 from django.views.generic import View, ListView
 from django.shortcuts import render, get_object_or_404
 
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from django.http import JsonResponse
 
 from film_recommender.models import Movie, UserReview, Genre, DailyRecommendedFilm
 from portal.movie_sources import MovieUrlsManager
@@ -63,7 +62,7 @@ class GenreView(ListView):
 class DailyRecommendView(ListView):
     template_name = 'portal/daily_recommend.html'
     model = DailyRecommendedFilm
-    context_object_name = 'daily_recommendation'
+    context_object_name = 'daily_recommendations'
 
     def get_queryset(self):
         queryset = self.model.get_user_recommendations(self.request.user.id)
@@ -86,7 +85,7 @@ class ReviewedMoviesView(ListView):
 
 
 def review(request, pk, **kwargs):
-    rating = request.data.get('rating')
+    rating = request.POST.get('rating')
     user = request.user
 
     review, created = UserReview.objects.get_or_create(user=user, movie_id=pk, defaults={
@@ -97,4 +96,4 @@ def review(request, pk, **kwargs):
         review.rating = rating
         review.save()
 
-    return Response(data={'status': 'ok'}, status=HTTP_200_OK)
+    return JsonResponse({'status': 'ok'})

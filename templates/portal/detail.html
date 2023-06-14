@@ -84,7 +84,7 @@
                                         class="value">{{ movie.duration }} {% translate 'min' %}.</span>
                                 </div>
                             </div>
-                            <div class="col-md-10 col-sm-10 col-ms-9 col-xs-12 mt-5">
+                            <div class="col">
                                 <div class="attr">
                                     <span class="entry">{% translate 'Release date' %}:</span> <span
                                         class="value">{{ movie.released_at }}</span>
@@ -92,6 +92,14 @@
                                 <div class="attr attr-story">
                                     <span class="entry">{% translate 'Overview' %}:</span>
                                     <span class="value">{{ movie.overview }}</span>
+                                </div>
+                                <div class="attr">
+                                    <span class="entry">{% translate 'Trailer' %}:</span>
+                                    <span class="value">
+                                        <a href="https://www.youtube.com/watch?v=TODt_q-_4C4&t=7s">
+                                            {% translate 'Watch on Youtube' %}
+                                        </a>
+                                    </span>
                                 </div>
                             </div>
                         </div>

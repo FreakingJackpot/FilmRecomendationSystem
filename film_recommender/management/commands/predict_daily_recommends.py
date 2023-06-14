@@ -1,4 +1,3 @@
-from itertools import chain
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
@@ -19,12 +18,14 @@ class Command(BaseCommand):
     _count_with_favourite_genres = settings.TOP_K // 2
 
     def handle(self, *args, **options):
-        user_ids = tuple(CustomUser.objects.values_list('id', flat=True).iterator())
+        user_ids = tuple(CustomUser.objects.filter(id=611).values_list('id', flat=True).iterator())
         with ThreadPoolExecutor() as executor:
-            for chunk in chunks(user_ids, self._users_chunk):
-                recommendations = chain(executor.map(self._get_user_recommendations, chunk))
+            for chunk in chunks(user_ids, 3):
+                recommendations = []
+                for result in executor.map(self._get_user_recommendations, chunk):
+                    recommendations.extend(result)
                 DailyRecommendedFilm.objects.filter(user_id__in=chunk).delete()
-                DailyRecommendedFilm.objects.bulk_create(recommendations, butch_size=self._butch_size)
+                DailyRecommendedFilm.objects.bulk_create(recommendations, batch_size=self._butch_size)
 
     def _get_user_recommendations(self, user_id):
         movie_ids = self._get_movie_ids(user_id)
@@ -35,7 +36,7 @@ class Command(BaseCommand):
         genre_ids = FavouriteGenre.objects.filter(user_id=user_id).values_list('genre_id', flat=True)
 
         base_queryset = Movie.objects.exclude(userreview__user_id=user_id).order_by('-rating')
-        favourite_genre_movies = base_queryset.filter(genres__id__in=genre_ids).values_list('id', flat=True)
+        favourite_genre_movies = base_queryset.filter(genres__id__in=genre_ids).distinct().values_list('id', flat=True)
         other_movies = base_queryset.values_list('id', flat=True)
 
         return {'favourite_genre': tuple(favourite_genre_movies), 'other': list(other_movies)}

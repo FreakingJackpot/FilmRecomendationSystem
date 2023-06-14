@@ -9,7 +9,7 @@ class DailyRecommendationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DailyRecommendedFilm
-        fields = ['computed_rating', 'tmdb_id', ]
+        fields = ['predicted_rating', 'tmdb_id', ]
 
 
 class PredictUserFilmsRatingParamsSerializer(serializers.Serializer):

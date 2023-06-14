@@ -18,7 +18,8 @@ class Movie(TranslatableModel):
     translations = TranslatedFields(
         title=models.TextField(verbose_name='Название'),
         overview=models.TextField(verbose_name='Сюжет', null=True, blank=True),
-        image_url=models.TextField(null=True, blank=True)
+        image_url=models.TextField(null=True, blank=True),
+        trailer_url=models.TextField(null=True, blank=True),
     )
 
     class Meta:
@@ -174,8 +175,7 @@ class DailyRecommendedFilm(models.Model):
 
     @classmethod
     def get_user_recommendations(cls, user_id):
-        return cls.objects.filter(user_id=user_id).prefetch_related('movie__translations').prefetch_related(
-            'movies__movie__genres')
+        return cls.objects.filter(user_id=user_id).prefetch_related('movie__translations')
 
 
 class FavouriteGenre(models.Model):
@@ -186,5 +186,3 @@ class FavouriteGenre(models.Model):
         unique_together = ['user', 'genre']
         verbose_name_plural = _('Favourite genres')
         verbose_name = _('Favourite genre')
-
-
